@@ -38,6 +38,7 @@ Private live-stream website built with core PHP, Bootstrap 5, jQuery, and AJAX. 
 
 ## Deployment Notes
 
+- If Render is set to Docker deploy, it will now find the root [Dockerfile](Dockerfile) and build the PHP container automatically.
 - Render should serve the PHP app from the repository root.
 - Point the app at Supabase using the PostgreSQL connection values from the Supabase dashboard.
 - Keep `BASE_URL` set to the public Render URL so redirects and embedded player origins resolve correctly.
