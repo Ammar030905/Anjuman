@@ -10,17 +10,7 @@ require_once __DIR__ . '/db.php';
 class Auth {
 
     private static function hasUsersItsSchema(Database $db): bool {
-        try {
-            $its = $db->fetchOne(
-                "SELECT 1 AS ok FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'its_number' LIMIT 1"
-            );
-            $phone = $db->fetchOne(
-                "SELECT 1 AS ok FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'phone' LIMIT 1"
-            );
-            return (bool) $its && (bool) $phone;
-        } catch (Exception $e) {
-            return false;
-        }
+        return $db->columnExists('users', 'its_number') && $db->columnExists('users', 'phone');
     }
 
     public static function ensureUsersSchema(Database $db): bool {
@@ -29,9 +19,11 @@ class Auth {
                 return true;
             }
 
-            $emailColumn = $db->fetchOne(
-                "SELECT 1 AS ok FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'email' LIMIT 1"
-            );
+            if ($db->isPostgres()) {
+                return false;
+            }
+
+            $emailColumn = $db->columnExists('users', 'email');
 
             if (!$emailColumn) {
                 return false;

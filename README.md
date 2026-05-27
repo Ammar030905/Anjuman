@@ -1,6 +1,6 @@
 # Anjuman E Ezzy
 
-Private live-stream website built with core PHP, MySQL, Bootstrap 5, jQuery, and AJAX.
+Private live-stream website built with core PHP, Bootstrap 5, jQuery, and AJAX. It can run against a local MySQL database or a hosted Supabase PostgreSQL database for deployment.
 
 ## What changed
 
@@ -20,13 +20,14 @@ Private live-stream website built with core PHP, MySQL, Bootstrap 5, jQuery, and
 
 ## Installation
 
-1. Import `database/schema.sql` into MySQL.
+1. For local development, import `database/schema.sql` into MySQL.
 	If your project already has the old email-based users table, run `database/migrate_users_to_its.sql` instead.
-2. Update `config/config.php` with your database credentials and local `BASE_URL`.
-3. Make sure the `users` table contains at least one admin account from the seed data.
-4. Log in at `login.php` using ITS Number `12345678` and password `Admin@1234`.
-5. Open `admin/users.php` to create more users.
-6. Open `admin/streams.php` and paste a YouTube live watch URL to start a stream.
+2. For Supabase deployment, create a PostgreSQL database and import `database/schema_supabase.sql`.
+3. Set these environment variables on Render or your hosting provider: `BASE_URL`, `APP_ENV`, `DB_DRIVER=pgsql`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS`, and `DB_SSLMODE=require`.
+4. Make sure the `users` table contains at least one admin account from the seed data.
+5. Log in at `login.php` using ITS Number `12345678` and password `Admin@1234`.
+6. Open `admin/users.php` to create more users.
+7. Open `admin/streams.php` and paste a YouTube live watch URL to start a stream.
 
 ## Stream workflow
 
@@ -34,6 +35,32 @@ Private live-stream website built with core PHP, MySQL, Bootstrap 5, jQuery, and
 - Copy the public YouTube live URL.
 - Paste it into the admin stream form.
 - The app extracts the video ID, stores it, and embeds the live player on the site.
+
+## Deployment Notes
+
+- Render should serve the PHP app from the repository root.
+- Point the app at Supabase using the PostgreSQL connection values from the Supabase dashboard.
+- Keep `BASE_URL` set to the public Render URL so redirects and embedded player origins resolve correctly.
+- The database helpers avoid automatic schema rewrites on PostgreSQL, so the schema must be provisioned before first login.
+
+## Environment Variables
+
+Set these values in Render or your hosting provider for the PHP app:
+
+```env
+APP_ENV=production
+BASE_URL=https://your-app.onrender.com
+DB_DRIVER=pgsql
+DB_HOST=aws-0-us-west-1.pooler.supabase.com
+DB_PORT=5432
+DB_NAME=postgres
+DB_USER=postgres
+DB_PASS=your_supabase_password
+DB_SSLMODE=require
+DB_SCHEMA=public
+```
+
+If you are still running locally with MySQL, keep `DB_DRIVER=mysql` and use the local database values instead.
 
 ## Notes
 

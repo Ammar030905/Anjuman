@@ -9,11 +9,7 @@ function hasStreamsSchema(Database $db): bool {
     try {
         $columns = ['title', 'status', 'created_at', 'youtube_url', 'youtube_video_id', 'created_by'];
         foreach ($columns as $column) {
-            $result = $db->fetchOne(
-                "SELECT 1 AS ok FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'streams' AND COLUMN_NAME = ? LIMIT 1",
-                [$column]
-            );
-            if (!$result) {
+            if (!$db->columnExists('streams', $column)) {
                 return false;
             }
         }
@@ -32,10 +28,14 @@ function ensureStreamsSchema(?Database $db = null): bool {
             return true;
         }
 
-        $hasYoutubeUrl = (bool) $db->fetchOne("SELECT 1 AS ok FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'streams' AND COLUMN_NAME = 'youtube_url' LIMIT 1");
-        $hasYoutubeVideoId = (bool) $db->fetchOne("SELECT 1 AS ok FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'streams' AND COLUMN_NAME = 'youtube_video_id' LIMIT 1");
-        $hasCreatedBy = (bool) $db->fetchOne("SELECT 1 AS ok FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'streams' AND COLUMN_NAME = 'created_by' LIMIT 1");
-        $hasCreatedAt = (bool) $db->fetchOne("SELECT 1 AS ok FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'streams' AND COLUMN_NAME = 'created_at' LIMIT 1");
+        if ($db->isPostgres()) {
+            return false;
+        }
+
+        $hasYoutubeUrl = $db->columnExists('streams', 'youtube_url');
+        $hasYoutubeVideoId = $db->columnExists('streams', 'youtube_video_id');
+        $hasCreatedBy = $db->columnExists('streams', 'created_by');
+        $hasCreatedAt = $db->columnExists('streams', 'created_at');
 
         if (!$hasYoutubeUrl) {
             $db->execute("ALTER TABLE streams ADD COLUMN youtube_url VARCHAR(500) NULL AFTER title");

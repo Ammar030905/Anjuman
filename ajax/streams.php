@@ -38,11 +38,11 @@ function normalizeStreamPayload(array $stream): array {
 
 function setOtherStreamsOffline(Database $db, ?int $exceptId = null): void {
     if ($exceptId) {
-        $db->execute('UPDATE streams SET status = "offline" WHERE status = "live" AND id != ?', [$exceptId]);
+        $db->execute("UPDATE streams SET status = 'offline' WHERE status = 'live' AND id != ?", [$exceptId]);
         return;
     }
 
-    $db->execute('UPDATE streams SET status = "offline" WHERE status = "live"');
+    $db->execute("UPDATE streams SET status = 'offline' WHERE status = 'live'");
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
