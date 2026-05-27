@@ -22,6 +22,7 @@ define('DB_PASS', getenv('DB_PASS') ?: '');
 define('DB_CHARSET', getenv('DB_CHARSET') ?: 'utf8mb4');
 define('DB_SCHEMA', getenv('DB_SCHEMA') ?: (in_array(strtolower(DB_DRIVER), ['pgsql', 'postgres', 'postgresql'], true) ? 'public' : DB_NAME));
 define('DB_SSLMODE', getenv('DB_SSLMODE') ?: 'require');
+define('DATABASE_URL', getenv('DATABASE_URL') ?: getenv('DB_URL') ?: '');
 
 // ─── Streaming ────────────────────────────────────────────────────────────────
 define('DEFAULT_STREAM_STATUS', 'offline');

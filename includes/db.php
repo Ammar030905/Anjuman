@@ -10,17 +10,74 @@ class Database {
     private static ?Database $instance = null;
     private PDO $pdo;
     private string $driver;
+    private string $host;
+    private string $name;
+    private string $port;
+    private string $user;
+    private string $pass;
+    private string $sslmode;
 
     private function __construct() {
         $this->driver = strtolower(DB_DRIVER);
-        if (in_array($this->driver, ['pgsql', 'postgres', 'postgresql'], true)) {
-            $dsn = 'pgsql:host=' . DB_HOST;
-            if (DB_PORT !== '') {
-                $dsn .= ';port=' . DB_PORT;
+        $this->host = DB_HOST;
+        $this->name = DB_NAME;
+        $this->port = DB_PORT;
+        $this->user = DB_USER;
+        $this->pass = DB_PASS;
+        $this->sslmode = DB_SSLMODE;
+
+        if (DATABASE_URL !== '') {
+            $parsed = parse_url(DATABASE_URL);
+            if ($parsed !== false) {
+                $scheme = strtolower($parsed['scheme'] ?? '');
+                if (in_array($scheme, ['postgres', 'postgresql', 'pgsql'], true)) {
+                    $this->driver = 'pgsql';
+                }
+
+                if (!empty($parsed['host'])) {
+                    $this->host = $parsed['host'];
+                }
+
+                if (!empty($parsed['port'])) {
+                    $this->port = (string) $parsed['port'];
+                }
+
+                if (!empty($parsed['path'])) {
+                    $this->name = ltrim($parsed['path'], '/');
+                }
+
+                if (!empty($parsed['user'])) {
+                    $this->user = rawurldecode($parsed['user']);
+                }
+
+                if (array_key_exists('pass', $parsed)) {
+                    $this->pass = rawurldecode((string) $parsed['pass']);
+                }
+
+                if (!empty($parsed['query'])) {
+                    parse_str($parsed['query'], $query);
+                    if (!empty($query['sslmode'])) {
+                        $this->sslmode = (string) $query['sslmode'];
+                    }
+                }
             }
-            $dsn .= ';dbname=' . DB_NAME . ';options=--client_encoding=UTF8;sslmode=' . DB_SSLMODE;
+        }
+
+        if (str_contains($this->host, '://')) {
+            $parsedHost = parse_url($this->host, PHP_URL_HOST);
+            if (is_string($parsedHost) && $parsedHost !== '') {
+                $this->host = $parsedHost;
+            }
+        }
+
+        if (in_array($this->driver, ['pgsql', 'postgres', 'postgresql'], true)) {
+            $dsn = 'pgsql:host=' . $this->host;
+            if ($this->port !== '') {
+                $dsn .= ';port=' . $this->port;
+            }
+            $dsn .= ';dbname=' . $this->name . ';options=--client_encoding=UTF8;sslmode=' . $this->sslmode;
         } else {
-            $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=' . DB_CHARSET;
+            $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->name . ';charset=' . DB_CHARSET;
         }
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -28,11 +85,14 @@ class Database {
             PDO::ATTR_EMULATE_PREPARES   => false,
         ];
         try {
-            $this->pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+            $this->pdo = new PDO($dsn, $this->user, $this->pass, $options);
         } catch (PDOException $e) {
-            error_log('DB Connection failed: ' . $e->getMessage());
+            error_log('DB Connection failed: driver=' . $this->driver . ', host=' . $this->host . ', db=' . $this->name . ', error=' . $e->getMessage());
             http_response_code(500);
-            die(json_encode(['success' => false, 'message' => 'Database connection failed.']));
+            $message = APP_ENV === 'development'
+                ? 'Database connection failed: ' . $e->getMessage()
+                : 'Database connection failed.';
+            die(json_encode(['success' => false, 'message' => $message]));
         }
     }
 

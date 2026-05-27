@@ -50,15 +50,21 @@ Set these values in Render or your hosting provider for the PHP app:
 
 ```env
 APP_ENV=production
-BASE_URL=https://your-app.onrender.com
+BASE_URL=https://anjuman.onrender.com
 DB_DRIVER=pgsql
-DB_HOST=aws-0-us-west-1.pooler.supabase.com
+DB_HOST=hwofzxpikgljednzbnxr.supabase.co
 DB_PORT=5432
 DB_NAME=postgres
 DB_USER=postgres
-DB_PASS=your_supabase_password
+DB_PASS=AnjumanEEzzy
 DB_SSLMODE=require
 DB_SCHEMA=public
+```
+
+Preferred alternative for Render and Supabase is a single connection string:
+
+```env
+DATABASE_URL=postgresql://postgres:your_supabase_password@aws-0-us-west-1.pooler.supabase.com:5432/postgres?sslmode=require
 ```
 
 If you are still running locally with MySQL, keep `DB_DRIVER=mysql` and use the local database values instead.
