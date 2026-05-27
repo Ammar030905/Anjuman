@@ -9,7 +9,7 @@ define('APP_NAME', 'Anjuman E Ezzy');
 define('APP_VERSION', '1.0.0');
 define('APP_ENV', getenv('APP_ENV') ?: 'development'); // 'development' | 'production'
 
-$baseUrl = getenv('BASE_URL') ?: getenv('APP_URL') ?: 'http://localhost/Anjuman-E-Ezzy';
+$baseUrl = getenv('BASE_URL') ?: getenv('APP_URL') ?: 'http://localhost/Anjuman';
 define('BASE_URL', rtrim($baseUrl, '/'));
 
 // ─── Database ─────────────────────────────────────────────────────────────────

@@ -6,7 +6,7 @@
 require_once __DIR__ . '/db.php';
 
 function hasStreamsSchema(Database $db): bool {
-    static ?bool $cached = null;
+    static $cached = null;
 
     if ($cached !== null) {
         return $cached;

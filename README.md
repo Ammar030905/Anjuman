@@ -1,6 +1,6 @@
 # Anjuman E Ezzy
 
-Private live-stream website built with core PHP, Bootstrap 5, jQuery, and AJAX. It can run against a local MySQL database or a hosted Supabase PostgreSQL database for deployment.
+Private live-stream website built with core PHP, Bootstrap 5, jQuery, and AJAX. It is set up for local Laragon development with a MySQL database.
 
 ## What changed
 
@@ -20,14 +20,15 @@ Private live-stream website built with core PHP, Bootstrap 5, jQuery, and AJAX. 
 
 ## Installation
 
-1. For local development, import `database/schema.sql` into MySQL.
+1. Place the project inside your Laragon `www` folder, for example `c:\laragon\www\Anjuman`.
+2. Start Apache and MySQL from Laragon.
+3. Import `database/schema.sql` into MySQL.
 	If your project already has the old email-based users table, run `database/migrate_users_to_its.sql` instead.
-2. For Supabase deployment, create a PostgreSQL database and import `database/schema_supabase.sql`.
-3. Set these environment variables on Render or your hosting provider: `BASE_URL`, `APP_ENV`, `DB_DRIVER=pgsql`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS`, and `DB_SSLMODE=require`.
-4. Make sure the `users` table contains at least one admin account from the seed data.
-5. Log in at `login.php` using ITS Number `12345678` and password `Admin@1234`.
-6. Open `admin/users.php` to create more users.
-7. Open `admin/streams.php` and paste a YouTube live watch URL to start a stream.
+4. Make sure `config/config.php` uses your Laragon URL, for example `http://localhost/Anjuman`.
+5. Make sure the `users` table contains at least one admin account from the seed data.
+6. Log in at `login.php` using ITS Number `12345678` and password `Admin@1234`.
+7. Open `admin/users.php` to create more users.
+8. Open `admin/streams.php` and paste a YouTube live watch URL to start a stream.
 
 ## Stream workflow
 
@@ -36,39 +37,24 @@ Private live-stream website built with core PHP, Bootstrap 5, jQuery, and AJAX. 
 - Paste it into the admin stream form.
 - The app extracts the video ID, stores it, and embeds the live player on the site.
 
-## Deployment Notes
-
-- If Render is set to Docker deploy, it will now find the root [Dockerfile](Dockerfile) and build the PHP container automatically.
-- Render should serve the PHP app from the repository root.
-- Point the app at Supabase using the PostgreSQL connection values from the Supabase dashboard.
-- Keep `BASE_URL` set to the public Render URL so redirects and embedded player origins resolve correctly.
-- The database helpers avoid automatic schema rewrites on PostgreSQL, so the schema must be provisioned before first login.
-- Configure Render's health check path to `/healthz.php` so startup failures are detected without forcing a database connection.
-
 ## Environment Variables
 
-Set these values in Render or your hosting provider for the PHP app:
+Set these values for local Laragon development:
 
 ```env
-APP_ENV=production
-BASE_URL=https://anjuman.onrender.com
-DB_DRIVER=pgsql
-DB_HOST=hwofzxpikgljednzbnxr.supabase.co
-DB_PORT=5432
-DB_NAME=postgres
-DB_USER=postgres
-DB_PASS=AnjumanEEzzy
-DB_SSLMODE=require
-DB_SCHEMA=public
+APP_ENV=development
+BASE_URL=http://localhost/Anjuman
+DB_DRIVER=mysql
+DB_HOST=localhost
+DB_PORT=
+DB_NAME=anjuman_ezzy
+DB_USER=root
+DB_PASS=
+DB_SSLMODE=
+DB_SCHEMA=anjuman_ezzy
 ```
 
-Preferred alternative for Render and Supabase is a single connection string:
-
-```env
-DATABASE_URL=postgresql://postgres:your_supabase_password@aws-0-us-west-1.pooler.supabase.com:5432/postgres?sslmode=require
-```
-
-If you are still running locally with MySQL, keep `DB_DRIVER=mysql` and use the local database values instead.
+If you use a different Laragon virtual host, update `BASE_URL` accordingly.
 
 ## Notes
 

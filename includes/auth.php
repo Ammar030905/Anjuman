@@ -10,14 +10,13 @@ require_once __DIR__ . '/db.php';
 class Auth {
 
     private static function hasUsersItsSchema(Database $db): bool {
-        static ?bool $cached = null;
+        static $cached = null;
 
         if ($cached !== null) {
             return $cached;
         }
 
-        $cached = $db->columnExists('users', 'its_number') && $db->columnExists('users', 'phone');
-        return $cached;
+        return $db->columnExists('users', 'its_number') && $db->columnExists('users', 'phone');
     }
 
     public static function ensureUsersSchema(Database $db): bool {

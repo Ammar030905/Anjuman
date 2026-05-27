@@ -145,8 +145,6 @@ function confirmAction(message, onConfirm) {
 const StreamViewer = (() => {
     let timerId = null;
     let statusUrl = '';
-    let isPolling = false;
-    let pollDelay = 30000;
 
     function setBadge(status) {
         const badges = document.querySelectorAll('#stream-status-badge');
@@ -255,49 +253,26 @@ const StreamViewer = (() => {
     }
 
     function poll() {
-        if (!statusUrl || document.hidden || isPolling) return;
-
-        isPolling = true;
+        if (!statusUrl) return;
         $.getJSON(statusUrl, { ts: Date.now() })
             .done((resp) => {
                 if (resp.success) {
                     update(resp);
-                    pollDelay = resp.status === 'live' ? 15000 : 30000;
                 }
             })
-            .fail(() => {
-                pollDelay = Math.min(pollDelay * 2, 60000);
-            })
-            .always(() => {
-                isPolling = false;
-                if (timerId) {
-                    window.clearTimeout(timerId);
-                }
-                timerId = window.setTimeout(poll, pollDelay);
-            });
+            .fail(() => {});
     }
 
     function init(url) {
         statusUrl = url || document.body.dataset.streamStatusUrl || '';
         if (!statusUrl) return;
-        pollDelay = 30000;
         poll();
-
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) {
-                pollDelay = 15000;
-                if (timerId) {
-                    window.clearTimeout(timerId);
-                    timerId = null;
-                }
-                poll();
-            }
-        });
+        timerId = window.setInterval(poll, 15000);
     }
 
     function stop() {
         if (timerId) {
-            window.clearTimeout(timerId);
+            window.clearInterval(timerId);
             timerId = null;
         }
     }
