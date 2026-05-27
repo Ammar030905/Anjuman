@@ -43,6 +43,7 @@ Private live-stream website built with core PHP, Bootstrap 5, jQuery, and AJAX. 
 - Point the app at Supabase using the PostgreSQL connection values from the Supabase dashboard.
 - Keep `BASE_URL` set to the public Render URL so redirects and embedded player origins resolve correctly.
 - The database helpers avoid automatic schema rewrites on PostgreSQL, so the schema must be provisioned before first login.
+- Configure Render's health check path to `/healthz.php` so startup failures are detected without forcing a database connection.
 
 ## Environment Variables
 

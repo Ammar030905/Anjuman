@@ -10,6 +10,9 @@ require_once __DIR__ . '/../includes/stream.php';
 $db = Database::getInstance();
 $stream = getCurrentStream($db) ?? getLatestStream($db);
 
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+
 if (!$stream) {
     jsonResponse([
         'success' => true,

@@ -15,7 +15,7 @@ if (!Auth::isAdmin()) {
 
 $db = Database::getInstance();
 
-if (!Auth::ensureUsersSchema($db)) {
+if (!$db->isPostgres() && !Auth::ensureUsersSchema($db)) {
     jsonResponse([
         'success' => false,
         'message' => 'Database schema migration could not be completed automatically. Run database/migrate_users_to_its.sql and try again.',

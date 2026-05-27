@@ -48,5 +48,9 @@ if (APP_ENV === 'development') {
     error_reporting(0);
     ini_set('display_errors', 0);
     ini_set('log_errors', 1);
-    ini_set('error_log', __DIR__ . '/../logs/error.log');
+    ini_set('error_log', 'php://stderr');
+    ini_set('expose_php', '0');
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.gc_maxlifetime', (string) SESSION_LIFETIME);
+    ini_set('default_socket_timeout', '5');
 }

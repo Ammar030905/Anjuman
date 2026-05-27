@@ -15,10 +15,18 @@ $user = Auth::user();
 $db = Database::getInstance();
 $currentStream = getCurrentStream($db) ?? getLatestStream($db);
 
-$totalUsers = (int) ($db->fetchOne('SELECT COUNT(*) AS count FROM users')['count'] ?? 0);
-$activeUsers = (int) ($db->fetchOne('SELECT COUNT(*) AS count FROM users WHERE status = 1')['count'] ?? 0);
-$totalStreams = (int) ($db->fetchOne('SELECT COUNT(*) AS count FROM streams')['count'] ?? 0);
-$liveStreams = (int) ($db->fetchOne('SELECT COUNT(*) AS count FROM streams WHERE status = "live"')['count'] ?? 0);
+$metrics = $db->fetchOne(
+    'SELECT
+        (SELECT COUNT(*) FROM users) AS total_users,
+        (SELECT COUNT(*) FROM users WHERE status = 1) AS active_users,
+        (SELECT COUNT(*) FROM streams) AS total_streams,
+        (SELECT COUNT(*) FROM streams WHERE status = ?) AS live_streams',
+    ['live']
+);
+$totalUsers = (int) ($metrics['total_users'] ?? 0);
+$activeUsers = (int) ($metrics['active_users'] ?? 0);
+$totalStreams = (int) ($metrics['total_streams'] ?? 0);
+$liveStreams = (int) ($metrics['live_streams'] ?? 0);
 $logs = $db->fetchAll('SELECT l.action, l.timestamp, u.name AS username FROM activity_logs l LEFT JOIN users u ON l.user_id = u.id ORDER BY l.timestamp DESC LIMIT 8');
 ?>
 <!DOCTYPE html>

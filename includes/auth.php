@@ -10,17 +10,24 @@ require_once __DIR__ . '/db.php';
 class Auth {
 
     private static function hasUsersItsSchema(Database $db): bool {
-        return $db->columnExists('users', 'its_number') && $db->columnExists('users', 'phone');
+        static ?bool $cached = null;
+
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        $cached = $db->columnExists('users', 'its_number') && $db->columnExists('users', 'phone');
+        return $cached;
     }
 
     public static function ensureUsersSchema(Database $db): bool {
         try {
-            if (self::hasUsersItsSchema($db)) {
-                return true;
+            if ($db->isPostgres()) {
+                return self::hasUsersItsSchema($db);
             }
 
-            if ($db->isPostgres()) {
-                return false;
+            if (self::hasUsersItsSchema($db)) {
+                return true;
             }
 
             $emailColumn = $db->columnExists('users', 'email');
@@ -74,13 +81,24 @@ class Auth {
     // ── Session Bootstrap ────────────────────────────────────────────────────
     public static function startSession(): void {
         if (session_status() === PHP_SESSION_NONE) {
+            $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+            if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+                $secure = strtolower((string) $_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https';
+            }
+
+            ini_set('session.use_strict_mode', '1');
+            ini_set('session.cookie_httponly', '1');
+            ini_set('session.cookie_secure', $secure ? '1' : '0');
+            ini_set('session.use_only_cookies', '1');
+            ini_set('session.gc_maxlifetime', (string) SESSION_LIFETIME);
+
             session_name(SESSION_NAME);
             session_set_cookie_params([
                 'lifetime' => SESSION_LIFETIME,
                 'path'     => '/',
-                'secure'   => false,          // set true in production (HTTPS)
+                'secure'   => $secure,
                 'httponly' => true,
-                'samesite' => 'Strict',
+                'samesite' => 'Lax',
             ]);
             session_start();
         }
@@ -90,7 +108,7 @@ class Auth {
     public static function login(string $identifier, string $password): array {
         $db = Database::getInstance();
 
-        if (!self::ensureUsersSchema($db)) {
+        if (!$db->isPostgres() && !self::ensureUsersSchema($db)) {
             return ['success' => false, 'message' => 'Database schema migration could not be completed automatically. Please run database/migrate_users_to_its.sql and try again.'];
         }
 
@@ -101,7 +119,7 @@ class Auth {
 
         // Fetch user
         $user = $db->fetchOne(
-            "SELECT * FROM users WHERE its_number = ? AND status = 1 LIMIT 1",
+            "SELECT id, its_number, name, phone, password, role, status FROM users WHERE its_number = ? AND status = 1 LIMIT 1",
             [$identifier]
         );
 

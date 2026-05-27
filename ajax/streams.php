@@ -16,7 +16,7 @@ if (!Auth::isAdmin()) {
 
 $db = Database::getInstance();
 
-if (!ensureStreamsSchema($db)) {
+if (!$db->isPostgres() && !ensureStreamsSchema($db)) {
     jsonResponse([
         'success' => false,
         'message' => 'Database schema migration could not be completed automatically. Please run the stream migration and try again.',
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($action === 'list') {
         try {
             $streams = $db->fetchAll(
-                'SELECT s.*, u.name AS creator_name
+                'SELECT s.id, s.title, s.youtube_url, s.youtube_video_id, s.status, s.created_by, s.created_at, u.name AS creator_name
                  FROM streams s
                  LEFT JOIN users u ON s.created_by = u.id
                  ORDER BY s.created_at DESC'
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
 
         $stream = $db->fetchOne(
-            'SELECT s.*, u.name AS creator_name
+            'SELECT s.id, s.title, s.youtube_url, s.youtube_video_id, s.status, s.created_by, s.created_at, u.name AS creator_name
              FROM streams s
              LEFT JOIN users u ON s.created_by = u.id
              WHERE s.id = ?
@@ -149,7 +149,7 @@ if ($action === 'save' || $action === 'start') {
         }
 
         $stream = $db->fetchOne(
-            'SELECT s.*, u.name AS creator_name
+            'SELECT s.id, s.title, s.youtube_url, s.youtube_video_id, s.status, s.created_by, s.created_at, u.name AS creator_name
              FROM streams s
              LEFT JOIN users u ON s.created_by = u.id
              WHERE s.id = ?

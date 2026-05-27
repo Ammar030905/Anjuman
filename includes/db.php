@@ -8,6 +8,7 @@ require_once __DIR__ . '/../config/config.php';
 
 class Database {
     private static ?Database $instance = null;
+    private static array $columnExistsCache = [];
     private PDO $pdo;
     private string $driver;
     private string $host;
@@ -75,7 +76,7 @@ class Database {
             if ($this->port !== '') {
                 $dsn .= ';port=' . $this->port;
             }
-            $dsn .= ';dbname=' . $this->name . ';options=--client_encoding=UTF8;sslmode=' . $this->sslmode;
+            $dsn .= ';dbname=' . $this->name . ';options=--client_encoding=UTF8;sslmode=' . $this->sslmode . ';connect_timeout=5;application_name=AnjumanEEzzy';
         } else {
             $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->name . ';charset=' . DB_CHARSET;
         }
@@ -83,6 +84,7 @@ class Database {
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES   => false,
+            PDO::ATTR_PERSISTENT         => APP_ENV !== 'development',
         ];
         try {
             $this->pdo = new PDO($dsn, $this->user, $this->pass, $options);
@@ -117,14 +119,21 @@ class Database {
 
     public function columnExists(string $table, string $column, ?string $schema = null): bool {
         $schema = $schema ?: DB_SCHEMA;
+        $cacheKey = strtolower($schema . '.' . $table . '.' . $column . '.' . $this->driver);
+
+        if (array_key_exists($cacheKey, self::$columnExistsCache)) {
+            return self::$columnExistsCache[$cacheKey];
+        }
 
         try {
             $result = $this->fetchOne(
                 'SELECT 1 AS ok FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1',
                 [$schema, $table, $column]
             );
-            return (bool) $result;
+            self::$columnExistsCache[$cacheKey] = (bool) $result;
+            return self::$columnExistsCache[$cacheKey];
         } catch (Exception $e) {
+            self::$columnExistsCache[$cacheKey] = false;
             return false;
         }
     }

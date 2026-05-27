@@ -6,16 +6,25 @@
 require_once __DIR__ . '/db.php';
 
 function hasStreamsSchema(Database $db): bool {
+    static ?bool $cached = null;
+
+    if ($cached !== null) {
+        return $cached;
+    }
+
     try {
         $columns = ['title', 'status', 'created_at', 'youtube_url', 'youtube_video_id', 'created_by'];
         foreach ($columns as $column) {
             if (!$db->columnExists('streams', $column)) {
+                $cached = false;
                 return false;
             }
         }
 
+        $cached = true;
         return true;
     } catch (Exception $e) {
+        $cached = false;
         return false;
     }
 }
@@ -137,7 +146,7 @@ function getCurrentStream(?Database $db = null): ?array {
         return null;
     }
     $stream = $db->fetchOne(
-        "SELECT s.*, u.name as creator_name
+    "SELECT s.id, s.title, s.youtube_url, s.youtube_video_id, s.status, s.created_by, s.created_at, u.name as creator_name
          FROM streams s
          LEFT JOIN users u ON s.created_by = u.id
          WHERE s.status = 'live'
@@ -154,7 +163,7 @@ function getLatestStream(?Database $db = null): ?array {
         return null;
     }
     $stream = $db->fetchOne(
-        "SELECT s.*, u.name as creator_name
+    "SELECT s.id, s.title, s.youtube_url, s.youtube_video_id, s.status, s.created_by, s.created_at, u.name as creator_name
          FROM streams s
          LEFT JOIN users u ON s.created_by = u.id
          ORDER BY s.created_at DESC, s.id DESC
