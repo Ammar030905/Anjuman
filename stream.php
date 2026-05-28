@@ -275,7 +275,7 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
         }
     </style>
 </head>
-<body data-stream-status-url="<?= BASE_URL ?>/ajax/stream_status.php" data-prevent-back-navigation="true">
+<body data-stream-status-url="<?= BASE_URL ?>/ajax/stream_status.php" data-session-status-url="<?= BASE_URL ?>/ajax/session_status.php" data-login-url="<?= BASE_URL ?>/login.php" data-prevent-back-navigation="true">
 <div class="watch-shell">
     <div class="watch-hero">
         <section class="player-card slide-up">

@@ -280,9 +280,61 @@ const StreamViewer = (() => {
     return { init, stop, refresh: poll };
 })();
 
+const SessionGuard = (() => {
+    let timerId = null;
+    let statusUrl = '';
+
+    function redirectToLogin(message) {
+        const target = (document.body.dataset.loginUrl || '/login.php') + '?expired=1';
+        if (message) {
+            Toast.warning('Session expired', message, 5000);
+        }
+        window.location.replace(target);
+    }
+
+    function poll() {
+        if (!statusUrl) return;
+
+        $.ajax({
+            url: statusUrl,
+            method: 'GET',
+            dataType: 'json',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        })
+            .done((resp) => {
+                if (!resp || resp.active !== true) {
+                    redirectToLogin(resp?.message || 'Please log in again.');
+                }
+            })
+            .fail((xhr) => {
+                if (xhr.status === 401) {
+                    const resp = xhr.responseJSON || {};
+                    redirectToLogin(resp.message || 'Please log in again.');
+                }
+            });
+    }
+
+    function init(url) {
+        statusUrl = url || document.body.dataset.sessionStatusUrl || '';
+        if (!statusUrl) return;
+        poll();
+        timerId = window.setInterval(poll, 20000);
+    }
+
+    function stop() {
+        if (timerId) {
+            window.clearInterval(timerId);
+            timerId = null;
+        }
+    }
+
+    return { init, stop };
+})();
+
 window.Toast = Toast;
 window.Csrf = Csrf;
 window.StreamViewer = StreamViewer;
+window.SessionGuard = SessionGuard;
 window.ajaxPost = ajaxPost;
 window.ajaxGet = ajaxGet;
 window.confirmAction = confirmAction;
@@ -302,6 +354,9 @@ function initScrollAnimations() {
 
 $(function () {
     initScrollAnimations();
+    if (document.body.dataset.sessionStatusUrl) {
+        SessionGuard.init(document.body.dataset.sessionStatusUrl);
+    }
     if (document.body.dataset.streamStatusUrl) {
         StreamViewer.init(document.body.dataset.streamStatusUrl);
     }

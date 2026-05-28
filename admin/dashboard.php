@@ -167,7 +167,7 @@ $logs = $db->fetchAll('SELECT l.action, l.timestamp, u.name AS username FROM act
         }
     </style>
 </head>
-<body class="admin-body" data-stream-status-url="<?= BASE_URL ?>/ajax/stream_status.php">
+<body class="admin-body" data-stream-status-url="<?= BASE_URL ?>/ajax/stream_status.php" data-session-status-url="<?= BASE_URL ?>/ajax/session_status.php" data-login-url="<?= BASE_URL ?>/admin/login.php">
 <div class="admin-wrap">
     <header class="topbar slide-up">
         <div class="brand">

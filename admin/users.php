@@ -86,7 +86,7 @@ $user = Auth::user();
         }
     </style>
 </head>
-<body class="admin-body">
+<body class="admin-body" data-session-status-url="<?= BASE_URL ?>/ajax/session_status.php" data-login-url="<?= BASE_URL ?>/admin/login.php">
 <div class="admin-wrap">
     <header class="topbar slide-up">
         <div class="brand">
