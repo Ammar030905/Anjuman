@@ -4,6 +4,8 @@
  * Anjuman E Ezzy - Live Streaming Platform
  */
 
+require_once __DIR__ . '/env.php';
+
 // ─── Environment ─────────────────────────────────────────────────────────────
 define('APP_NAME', 'Anjuman E Ezzy');
 define('APP_VERSION', '1.0.0');

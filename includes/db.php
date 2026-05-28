@@ -31,34 +31,36 @@ class Database {
             $parsed = parse_url(DATABASE_URL);
             if ($parsed !== false) {
                 $scheme = strtolower($parsed['scheme'] ?? '');
-                if (in_array($scheme, ['postgres', 'postgresql', 'pgsql'], true)) {
-                    $this->driver = 'pgsql';
-                }
+                if (in_array($scheme, ['mysql', 'mysqli', 'postgres', 'postgresql', 'pgsql'], true)) {
+                    if (in_array($scheme, ['postgres', 'postgresql', 'pgsql'], true)) {
+                        $this->driver = 'pgsql';
+                    }
 
-                if (!empty($parsed['host'])) {
-                    $this->host = $parsed['host'];
-                }
+                    if (!empty($parsed['host'])) {
+                        $this->host = $parsed['host'];
+                    }
 
-                if (!empty($parsed['port'])) {
-                    $this->port = (string) $parsed['port'];
-                }
+                    if (!empty($parsed['port'])) {
+                        $this->port = (string) $parsed['port'];
+                    }
 
-                if (!empty($parsed['path'])) {
-                    $this->name = ltrim($parsed['path'], '/');
-                }
+                    if (!empty($parsed['path'])) {
+                        $this->name = ltrim($parsed['path'], '/');
+                    }
 
-                if (!empty($parsed['user'])) {
-                    $this->user = rawurldecode($parsed['user']);
-                }
+                    if (!empty($parsed['user'])) {
+                        $this->user = rawurldecode($parsed['user']);
+                    }
 
-                if (array_key_exists('pass', $parsed)) {
-                    $this->pass = rawurldecode((string) $parsed['pass']);
-                }
+                    if (array_key_exists('pass', $parsed)) {
+                        $this->pass = rawurldecode((string) $parsed['pass']);
+                    }
 
-                if (!empty($parsed['query'])) {
-                    parse_str($parsed['query'], $query);
-                    if (!empty($query['sslmode'])) {
-                        $this->sslmode = (string) $query['sslmode'];
+                    if (!empty($parsed['query'])) {
+                        parse_str($parsed['query'], $query);
+                        if (!empty($query['sslmode'])) {
+                            $this->sslmode = (string) $query['sslmode'];
+                        }
                     }
                 }
             }
