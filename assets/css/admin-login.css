@@ -1,0 +1,27 @@
+/* Red-themed admin login */
+:root{
+    --admin-bg:#fff5f5;
+    --admin-accent:#b5171f;
+    --admin-accent-dark:#7f0f13;
+    --admin-contrast:#ffffff;
+}
+body.admin-login{
+    background: linear-gradient(180deg,#fff5f6 0%, #feecec 100%);
+    min-height:100vh;
+    display:flex;align-items:center;justify-content:center;padding:28px;
+}
+.login-card-admin{
+    width:100%;max-width:440px;background:#fff;border:1px solid rgba(181,23,31,0.12);border-radius:16px;padding:28px;box-shadow:0 18px 46px rgba(181,23,31,0.12);
+}
+.login-card-admin .brand-title{color:var(--admin-accent);font-weight:800;margin-bottom:6px}
+.login-card-admin .brand-sub{color:var(--admin-accent-dark);font-weight:600;margin-bottom:10px}
+
+/* Ensure login page logo displays properly */
+.login-card-admin img { display:block; margin:0 auto 10px; width:84px; height:84px; object-fit:contain; }
+.form-control.admin{
+    border:1px solid rgba(181,23,31,0.16);background:transparent;color:#222
+}
+.btn-admin-login{
+    background:linear-gradient(90deg,var(--admin-accent),var(--admin-accent-dark));color:var(--admin-contrast);border:none;padding:12px 16px;border-radius:999px;font-weight:700;width:100%
+}
+.alert-admin{background:rgba(181,23,31,0.06);border:1px solid rgba(181,23,31,0.12);color:var(--admin-accent);padding:10px;border-radius:8px}

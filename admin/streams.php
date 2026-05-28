@@ -14,6 +14,7 @@ Auth::requireAdmin();
 $user = Auth::user();
 $db = Database::getInstance();
 $currentStream = getCurrentStream($db) ?? getLatestStream($db);
+$currentAttendanceCount = ($currentStream && !empty($currentStream['id'])) ? getStreamAttendanceCount($db, (int) $currentStream['id']) : 0;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -28,9 +29,8 @@ $currentStream = getCurrentStream($db) ?? getLatestStream($db);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="<?= BASE_URL ?>/assets/css/style.css" rel="stylesheet">
     <link href="<?= BASE_URL ?>/assets/css/admin.css" rel="stylesheet">
+    <link href="<?= BASE_URL ?>/assets/css/admin-red.css" rel="stylesheet">
     <style>
-        body { background: transparent; }
-
         .admin-wrap {
             max-width: 1480px;
             margin: 0 auto;
@@ -153,13 +153,18 @@ $currentStream = getCurrentStream($db) ?? getLatestStream($db);
 <div class="admin-wrap">
     <header class="topbar slide-up">
         <div class="brand">
-            <div class="brand-logo">🎥</div>
+            <div class="brand-logo">
+                <img src="<?= BASE_URL ?>/assets/images/logo-removebg-preview.png" alt="Anjuman logo" style="width:46px;height:46px;object-fit:contain;">
+            </div>
             <div>
-                <div class="fw-bold" style="font-size:1.15rem;"><?= e(APP_NAME) ?></div>
-                <div class="text-muted small">Paste a YouTube live URL and control playback</div>
+                <div class="fw-bold" style="font-size:1.05rem;">Anjuman E Ezzy</div>
+                <div class="text-muted small">Hatemi Mohallah, Rajkot — Relay Committee</div>
+                <div class="text-muted xsmall" style="font-size:.72rem">Ashara Mubaraka 1448</div>
             </div>
         </div>
-        <div class="d-flex gap-2 flex-wrap">
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+            <a href="<?= BASE_URL ?>/admin/attendance.php" class="btn btn-outline-light rounded-pill">Attendance</a>
+            <a href="<?= BASE_URL ?>/admin/notices.php" class="btn btn-outline-light rounded-pill">Notices</a>
             <a href="<?= BASE_URL ?>/admin/dashboard.php" class="btn btn-outline-light rounded-pill">Dashboard</a>
             <a href="<?= BASE_URL ?>/admin/users.php" class="btn btn-outline-light rounded-pill">Users</a>
             <a href="<?= BASE_URL ?>/logout.php" class="btn btn-dark rounded-pill">Logout</a>
@@ -178,6 +183,11 @@ $currentStream = getCurrentStream($db) ?? getLatestStream($db);
         <div class="metric-card">
             <div class="metric-label">YouTube Visibility</div>
             <div class="metric-value">Unlisted</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Attendance</div>
+            <div class="metric-value"><?= e($currentAttendanceCount) ?></div>
+            <div class="text-muted small">Unique users on current stream</div>
         </div>
     </section>
 

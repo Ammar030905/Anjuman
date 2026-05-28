@@ -77,12 +77,11 @@ if ($action === 'create') {
     $itsNumber = trim(sanitizeInput($_POST['its_number'] ?? ''));
     $name = sanitizeInput($_POST['name'] ?? '');
     $phone = trim(sanitizeInput($_POST['phone'] ?? ''));
-    $password = (string) ($_POST['password'] ?? '');
     $role = sanitizeInput($_POST['role'] ?? 'user');
     $status = (int) ($_POST['status'] ?? 1);
 
-    if (!$itsNumber || !$name || !$phone || !$password) {
-        jsonResponse(['success' => false, 'message' => 'ITS number, name, phone, and password are required.']);
+    if (!$itsNumber || !$name || !$phone) {
+        jsonResponse(['success' => false, 'message' => 'ITS number, name, and phone are required.']);
     }
 
     if (!preg_match('/^\d{8}$/', $itsNumber)) {
@@ -104,7 +103,7 @@ if ($action === 'create') {
 
         $db->insert(
             'INSERT INTO users (its_number, name, phone, password, role, status, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
-            [$itsNumber, $name, $phone, password_hash($password, PASSWORD_DEFAULT), $role, $status === 0 ? 0 : 1]
+            [$itsNumber, $name, $phone, '', $role, $status === 0 ? 0 : 1]
         );
 
         Auth::logActivity((int) $_SESSION['user_id'], 'Created user account: ' . $name . ' (ITS: ' . $itsNumber . ')');
@@ -119,7 +118,6 @@ if ($action === 'update') {
     $itsNumber = trim(sanitizeInput($_POST['its_number'] ?? ''));
     $name = sanitizeInput($_POST['name'] ?? '');
     $phone = trim(sanitizeInput($_POST['phone'] ?? ''));
-    $password = (string) ($_POST['password'] ?? '');
     $role = sanitizeInput($_POST['role'] ?? 'user');
     $status = (int) ($_POST['status'] ?? 1);
 
@@ -145,17 +143,10 @@ if ($action === 'update') {
             jsonResponse(['success' => false, 'message' => 'ITS number already belongs to another user.']);
         }
 
-        if ($password !== '') {
-            $db->execute(
-                'UPDATE users SET its_number = ?, name = ?, phone = ?, password = ?, role = ?, status = ? WHERE id = ?',
-                [$itsNumber, $name, $phone, password_hash($password, PASSWORD_DEFAULT), $role, $status === 0 ? 0 : 1, $id]
-            );
-        } else {
-            $db->execute(
-                'UPDATE users SET its_number = ?, name = ?, phone = ?, role = ?, status = ? WHERE id = ?',
-                [$itsNumber, $name, $phone, $role, $status === 0 ? 0 : 1, $id]
-            );
-        }
+        $db->execute(
+            'UPDATE users SET its_number = ?, name = ?, phone = ?, role = ?, status = ? WHERE id = ?',
+            [$itsNumber, $name, $phone, $role, $status === 0 ? 0 : 1, $id]
+        );
 
         Auth::logActivity((int) $_SESSION['user_id'], 'Updated user account: ' . $name . ' (ITS: ' . $itsNumber . ')');
         jsonResponse(['success' => true, 'message' => 'User updated successfully.']);

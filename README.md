@@ -23,11 +23,10 @@ Private live-stream website built with core PHP, Bootstrap 5, jQuery, and AJAX. 
 1. Place the project inside your Laragon `www` folder, for example `c:\laragon\www\Anjuman`.
 2. Start Apache and MySQL from Laragon.
 3. Import `database/schema.sql` into MySQL.
-	If your project already has the old email-based users table, run `database/migrate_users_to_its.sql` instead.
 4. Make sure `config/config.php` uses your Laragon URL, for example `http://localhost/Anjuman`.
 5. Make sure the `users` table contains at least one admin account from the seed data.
-6. Log in at `login.php` using ITS Number `12345678` and password `Admin@1234`.
-7. Open `admin/users.php` to create more users.
+6. Log in at `login.php` using ITS Number `12345678`.
+7. Open `admin/users.php` to create more users by ITS number only.
 8. Open `admin/streams.php` and paste a YouTube live watch URL to start a stream.
 
 ## Stream workflow
@@ -60,4 +59,5 @@ If you use a different Laragon virtual host, update `BASE_URL` accordingly.
 
 - Streams are intended to be unlisted for privacy.
 - The site uses CSRF-protected AJAX endpoints and prepared statements.
+- Login is ITS-only and enforces a single active session per user.
 - Users watch the stream entirely inside the website.

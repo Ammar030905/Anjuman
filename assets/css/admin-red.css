@@ -1,0 +1,162 @@
+/* ============================================================
+ * Anjuman E Ezzy - Admin Theme Overrides
+ * Matches login page: warm cream, gold borders, teal accent
+ * ============================================================ */
+
+/* Body background — identical to login page */
+body,
+.admin-body {
+    background:
+        radial-gradient(circle at top left, rgba(183, 138, 58, 0.18) 0%, transparent 32%),
+        radial-gradient(circle at bottom right, rgba(11, 109, 88, 0.08) 0%, transparent 28%),
+        linear-gradient(180deg, #f9f2df 0%, #f5edd8 100%) !important;
+    color: var(--text-primary);
+}
+
+/* Page frame — same as login */
+.page-frame {
+    position: fixed;
+    inset: 14px;
+    pointer-events: none;
+    border: 2px solid rgba(183, 138, 58, 0.55);
+    border-radius: 2px;
+    z-index: 0;
+}
+
+/* Cards / panels */
+.admin-card,
+.table-wrapper,
+.metric-card,
+.stream-card,
+.section-card,
+.current-stream-card {
+    background: rgba(255, 252, 244, 0.9) !important;
+    border: 1px solid rgba(183, 138, 58, 0.24) !important;
+    box-shadow: 0 6px 24px rgba(86, 68, 20, 0.10) !important;
+}
+
+/* Topbar */
+.topbar {
+    background: rgba(255, 251, 242, 0.82) !important;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(183, 138, 58, 0.25) !important;
+}
+
+/* Sidebar */
+.admin-sidebar {
+    background: linear-gradient(180deg, #fdf8ee 0%, #f7eedb 100%) !important;
+    border-right: 1px solid rgba(183, 138, 58, 0.22) !important;
+}
+
+.sidebar-brand,
+.sidebar-logo {
+    border-bottom: 1px solid rgba(183, 138, 58, 0.16) !important;
+}
+
+.brand-logo,
+.sidebar-logo-icon {
+    background: linear-gradient(135deg, rgba(183, 138, 58, 0.18), rgba(11, 109, 88, 0.12)) !important;
+    border: 1px solid rgba(183, 138, 58, 0.3) !important;
+}
+
+.menu-item:hover,
+.sidebar-link:hover {
+    background: rgba(183, 138, 58, 0.08) !important;
+    color: var(--accent) !important;
+}
+
+.menu-item.active,
+.sidebar-link.active {
+    background: rgba(183, 138, 58, 0.13) !important;
+    color: var(--accent) !important;
+}
+
+.menu-item.active::before,
+.sidebar-link.active::before {
+    background: linear-gradient(180deg, #d6ac5c, #b78733) !important;
+}
+
+.sidebar-user-card {
+    background: rgba(255, 252, 244, 0.92) !important;
+}
+
+.sidebar-user-avatar {
+    background: rgba(183, 138, 58, 0.14) !important;
+    color: var(--accent) !important;
+}
+
+.sidebar-footer {
+    border-top: 1px solid rgba(183, 138, 58, 0.16) !important;
+}
+
+/* Admin header */
+.admin-header {
+    background: rgba(252, 247, 235, 0.92) !important;
+    border-bottom: 1px solid rgba(183, 138, 58, 0.16) !important;
+}
+
+/* Table */
+.table-dark thead th {
+    background: rgba(247, 239, 224, 0.9) !important;
+    color: var(--text-secondary) !important;
+    border-bottom: 1px solid rgba(183, 138, 58, 0.18) !important;
+}
+
+.table-dark td {
+    border-color: rgba(183, 138, 58, 0.12) !important;
+}
+
+/* Badges */
+.bg-success-glow,
+.bg-primary-glow,
+.bg-info-glow,
+.badge-success-glow {
+    background: rgba(11, 109, 88, 0.12) !important;
+    color: var(--accent) !important;
+    border: 1px solid rgba(11, 109, 88, 0.2) !important;
+}
+
+.role-badge.role-admin,
+.status-pill.active {
+    background: rgba(11, 109, 88, 0.12) !important;
+    color: var(--accent) !important;
+    border: 1px solid rgba(11, 109, 88, 0.24) !important;
+}
+
+/* Action buttons */
+.btn-edit   { background: rgba(27, 143, 151, 0.14) !important; color: var(--turquoise) !important; }
+.btn-delete { background: rgba(183, 138, 58, 0.15) !important; color: var(--gold-deep) !important; }
+.btn-toggle-on  { background: rgba(11, 109, 88, 0.14) !important; color: var(--accent) !important; }
+.btn-toggle-off { background: rgba(82, 100, 94, 0.14) !important; color: var(--text-secondary) !important; }
+
+/* Stream card thumb */
+.stream-card-thumb {
+    background: linear-gradient(135deg, rgba(8, 52, 43, 0.9) 0%, rgba(17, 126, 133, 0.65) 100%) !important;
+}
+
+/* Sidebar backdrop */
+.sidebar-backdrop,
+.sidebar-overlay {
+    background: rgba(9, 33, 28, 0.46) !important;
+}
+
+/* Primary action button — teal gradient matching login */
+.btn-danger,
+.btn-primary-red {
+    background: linear-gradient(135deg, #177a79 0%, #134f4e 55%, #0d3e3d 100%) !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 10px 26px rgba(13, 62, 61, 0.28) !important;
+}
+
+.btn-danger:hover,
+.btn-primary-red:hover {
+    background: linear-gradient(135deg, #1a8a89 0%, #155857 55%, #0f4645 100%) !important;
+    color: #fff !important;
+    transform: translateY(-1px);
+}
+
+/* Logo sizing */
+.brand-mark img { width: 56px; height: 56px; object-fit: contain; }
+.brand-logo img { width: 42px; height: 42px; object-fit: contain; }
+.sidebar-logo img { width: 42px; height: 42px; object-fit: contain; }

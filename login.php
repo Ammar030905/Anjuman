@@ -25,12 +25,11 @@ if (isPost()) {
         $error = 'Invalid security token. Please try again.';
     } else {
         $identifier = sanitizeInput($_POST['identifier'] ?? '');
-        $password = $_POST['password'] ?? '';
 
-        if (!$identifier || !$password) {
-            $error = 'ITS number and password are required.';
+        if (!$identifier) {
+            $error = 'ITS number is required.';
         } else {
-            $result = Auth::login($identifier, $password);
+            $result = Auth::login($identifier);
             if ($result['success']) {
                 redirect($result['role'] === 'admin'
                     ? BASE_URL . '/admin/dashboard.php'
@@ -57,7 +56,20 @@ $csrfField = CSRF::field();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="<?= BASE_URL ?>/assets/css/style.css" rel="stylesheet">
     <style>
-        body { background: transparent; }
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(183, 138, 58, 0.18) 0%, transparent 32%),
+                radial-gradient(circle at bottom right, rgba(11, 109, 88, 0.08) 0%, transparent 28%),
+                linear-gradient(180deg, #f9f2df 0%, #f5edd8 100%);
+        }
+
+        body::before {
+            opacity: 0.18;
+            background-image:
+                linear-gradient(45deg, rgba(183, 138, 58, 0.08) 25%, transparent 25%),
+                linear-gradient(-45deg, rgba(183, 138, 58, 0.08) 25%, transparent 25%);
+            background-size: 42px 42px;
+        }
 
         .login-page {
             min-height: 100vh;
@@ -66,140 +78,201 @@ $csrfField = CSRF::field();
             justify-content: center;
             position: relative;
             overflow: hidden;
-            padding: 20px;
+            padding: 24px;
         }
 
-        /* Animated background */
-        .login-bg {
+        .page-frame {
             position: fixed;
-            inset: 0;
+            inset: 14px;
+            pointer-events: none;
+            border: 2px solid rgba(183, 138, 58, 0.55);
+            border-radius: 2px;
             z-index: 0;
-            background:
-            radial-gradient(ellipse 80% 60% at 14% 34%, rgba(11,109,88,0.11) 0%, transparent 62%),
-            radial-gradient(ellipse 58% 74% at 88% 74%, rgba(183,138,58,0.11) 0%, transparent 65%),
-            radial-gradient(ellipse 64% 80% at 62% 14%, rgba(27,143,151,0.08) 0%, transparent 70%),
-            var(--bg-primary);
         }
 
-        .login-bg-lines {
+        .page-frame::before,
+        .page-frame::after {
+            content: '';
             position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(183,138,58,0.09) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(183,138,58,0.09) 1px, transparent 1px);
-            background-size: 52px 52px;
-            opacity: 0.3;
+            top: -2px;
+            width: 78px;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(183, 138, 58, 0.95), rgba(183, 138, 58, 0.1));
+        }
+
+        .page-frame::after {
+            right: 0;
+            left: auto;
+            background: linear-gradient(90deg, rgba(183, 138, 58, 0.1), rgba(183, 138, 58, 0.95));
+        }
+
+        .page-frame .frame-bottom-left,
+        .page-frame .frame-bottom-right {
+            position: absolute;
+            bottom: -2px;
+            width: 78px;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(183, 138, 58, 0.95), rgba(183, 138, 58, 0.1));
+        }
+
+        .page-frame .frame-bottom-right {
+            right: 0;
+            left: auto;
+            background: linear-gradient(90deg, rgba(183, 138, 58, 0.1), rgba(183, 138, 58, 0.95));
+        }
+
+        .login-shell {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 26px;
+            padding: 22px 18px 28px;
+        }
+
+        .site-title {
+            text-align: center;
+            color: var(--accent);
+        }
+
+        .site-title h1 {
+            font-size: clamp(2.2rem, 4vw, 3.65rem);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            color: var(--accent);
+        }
+
+        .site-title .eyebrow {
+            color: var(--turquoise);
+            font-size: 0.92rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .star-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            color: var(--gold);
+            margin-bottom: 2px;
+        }
+
+        .star-divider::before,
+        .star-divider::after {
+            content: '';
+            width: 92px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(183, 138, 58, 0.8), transparent);
+        }
+
+        .card-wrap {
+            width: 100%;
+            display: flex;
+            justify-content: center;
         }
 
         .login-card {
             position: relative;
             z-index: 1;
             width: 100%;
-            max-width: 440px;
-            background: rgba(255, 251, 242, 0.75);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(183, 138, 58, 0.3);
-            border-radius: 24px;
-            padding: 44px 40px;
-            box-shadow: 0 32px 80px rgba(9, 37, 31, 0.2);
-            animation: slideUp 0.5s cubic-bezier(0.4,0,0.2,1) both;
+            max-width: 468px;
+            background: rgba(255, 252, 244, 0.9);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(183, 138, 58, 0.22);
+            border-top: 4px solid rgba(183, 138, 58, 0.78);
+            border-radius: 22px;
+            padding: 44px 42px 40px;
+            box-shadow: 0 24px 60px rgba(86, 68, 20, 0.16);
+            animation: slideUp 0.55s cubic-bezier(0.4,0,0.2,1) both;
         }
 
         .login-card::before {
             content: '';
             position: absolute;
             inset: 10px;
-            border: 1px solid rgba(183, 138, 58, 0.25);
+            border: 1px solid rgba(183, 138, 58, 0.18);
             border-radius: 18px;
             pointer-events: none;
         }
 
         .login-logo {
             display: flex;
+            flex-direction: column;
             align-items: center;
             gap: 14px;
-            margin-bottom: 32px;
+            margin-bottom: 18px;
+            text-align: center;
         }
 
-        .login-logo-icon {
-            width: 52px; height: 52px;
-            background: linear-gradient(135deg, var(--accent) 0%, var(--turquoise) 100%);
-            border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.6rem;
-            box-shadow: 0 8px 24px var(--accent-glow);
+        .login-logo img {
+            display: block;
+            width: 96px;
+            height: 96px;
+            object-fit: contain;
+            margin: 0 auto 2px;
         }
 
         .login-logo-text { line-height: 1.2; }
         .login-logo-name {
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             font-family: var(--font-heading);
-            letter-spacing: 0.02em;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent);
         }
         .login-logo-sub {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            font-weight: 500;
+            font-size: 0.78rem;
+            color: var(--turquoise);
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.18em;
         }
 
         .login-heading {
-            font-size: 1.7rem;
+            font-size: 1.78rem;
             font-weight: 800;
-            margin-bottom: 6px;
-            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            color: var(--accent);
+            text-align: center;
         }
 
         .login-sub {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            margin-bottom: 28px;
-        }
-
-        .login-divider {
-            height: 1px;
-            background: var(--border);
-            margin-bottom: 28px;
-        }
-
-        .password-wrapper {
-            position: relative;
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 14px; top: 50%;
-            transform: translateY(-50%);
-            background: none; border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 4px;
-            transition: var(--transition-fast);
+            color: var(--gold);
             font-size: 1rem;
+            margin-bottom: 26px;
+            font-family: 'Marcellus', serif;
+            font-style: italic;
         }
-        .password-toggle:hover { color: var(--text-primary); }
 
         .btn-login {
             width: 100%;
-            padding: 14px;
+            padding: 15px 18px;
             font-size: 1rem;
-            font-weight: 700;
-            background: var(--accent);
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #177a79 0%, #134f4e 55%, #0d3e3d 100%);
             color: #fff;
             border: none;
-            border-radius: var(--radius-sm);
+            border-radius: 999px;
             cursor: pointer;
             transition: var(--transition);
-            box-shadow: 0 4px 20px var(--accent-glow);
-            margin-top: 8px;
+            box-shadow: 0 10px 26px rgba(13, 62, 61, 0.28);
+            margin-top: 14px;
             display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         .btn-login:hover {
-            background: var(--accent-hover);
             transform: translateY(-1px);
-            box-shadow: 0 8px 28px var(--accent-glow);
+            box-shadow: 0 14px 32px rgba(13, 62, 61, 0.34);
         }
         .btn-login:active { transform: translateY(0); }
         .btn-login:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
@@ -228,9 +301,16 @@ $csrfField = CSRF::field();
 
         .login-footer {
             text-align: center;
-            margin-top: 28px;
+            margin-top: 18px;
             font-size: 0.78rem;
             color: var(--text-muted);
+            letter-spacing: 0.04em;
+        }
+
+        .login-note {
+            font-size: 0.84rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
         }
 
         @keyframes slideUp {
@@ -240,99 +320,81 @@ $csrfField = CSRF::field();
     </style>
 </head>
 <body>
-<div class="login-bg"><div class="login-bg-lines"></div></div>
+<div class="page-frame"><span class="frame-bottom-left"></span><span class="frame-bottom-right"></span></div>
 
 <div class="login-page">
-    <div class="login-card">
-
-        <!-- Logo -->
-        <div class="login-logo">
-            <div class="login-logo-icon">📡</div>
-            <div class="login-logo-text">
-                <div class="login-logo-name"><?= e(APP_NAME) ?></div>
-                <div class="login-logo-sub">Live Streaming Platform</div>
-            </div>
+    <div class="login-shell">
+        <div class="site-title">
+            <img src="<?= BASE_URL ?>/assets/images/logo.svg" alt="Anjuman logo" style="width:84px;height:84px;object-fit:contain;margin-bottom:10px;" onerror="this.style.display='none'">
+            <h1>Anjuman E Ezzy</h1>
+            <div class="eyebrow">Hatemi Mohallah, Rajkot</div>
+            <div class="eyebrow" style="font-size:0.92rem;margin-top:6px;">Relay Committee &middot; Ashara Mubaraka 1448</div>
         </div>
 
-        <div class="login-divider"></div>
+        <div class="card-wrap">
+            <div class="login-card">
+                <div class="login-logo">
+                    <img src="<?= BASE_URL ?>/assets/images/logo-removebg-preview.png" alt="Anjuman logo" style="width:120px;height:auto;">
+                    <div class="login-logo-text">
+                        <div class="login-logo-name">Member Login</div>
+                        <div class="login-logo-sub">Welcome to our community</div>
+                    </div>
+                </div>
 
-        <h1 class="login-heading">Welcome Back</h1>
-        <p class="login-sub">Sign in to access the private community platform</p>
+                <h1 class="login-heading">Enter ITS</h1>
 
-        <!-- Alerts -->
-        <?php if ($error): ?>
-            <div class="alert-error" role="alert">
-                <span>⚠️</span>
-                <span><?= e($error) ?></span>
-            </div>
-        <?php endif; ?>
+                <!-- Alerts -->
+                <?php if ($error): ?>
+                    <div class="alert-error" role="alert">
+                        <span>⚠️</span>
+                        <span><?= e($error) ?></span>
+                    </div>
+                <?php endif; ?>
 
-        <?php if ($success): ?>
-            <div class="alert-success-box" role="alert">
-                <span>✅</span>
-                <span><?= e($success) ?></span>
-            </div>
-        <?php endif; ?>
+                <?php if ($success): ?>
+                    <div class="alert-success-box" role="alert">
+                        <span>✅</span>
+                        <span><?= e($success) ?></span>
+                    </div>
+                <?php endif; ?>
 
-        <!-- Login Form -->
-        <form method="POST" action="" id="loginForm" novalidate>
-            <?= $csrfField ?>
+                <!-- Login Form -->
+                <form method="POST" action="" id="loginForm" novalidate>
+                    <?= $csrfField ?>
 
-            <div class="mb-4">
-                <label for="identifier" class="form-label-dark">ITS Number</label>
-                <input
-                    type="text"
-                    id="identifier"
-                    name="identifier"
-                    class="form-control form-control-dark"
-                    placeholder="Enter 8-digit ITS number"
-                    maxlength="8"
-                    pattern="\d{8}"
-                    value="<?= e($_POST['identifier'] ?? '') ?>"
-                    required
-                    autocomplete="username"
-                    autofocus
-                >
-            </div>
+                    <div class="mb-4">
+                        <label for="identifier" class="form-label-dark">ITS</label>
+                        <input
+                            type="text"
+                            id="identifier"
+                            name="identifier"
+                            class="form-control form-control-dark"
+                            placeholder="Enter your ITS"
+                            maxlength="8"
+                            pattern="\d{8}"
+                            value="<?= e($_POST['identifier'] ?? '') ?>"
+                            required
+                            autocomplete="username"
+                            autofocus
+                        >
+                        <small class="login-note">This site uses only ITS number.</small>
+                    </div>
 
-            <div class="mb-4">
-                <label for="password" class="form-label-dark">Password</label>
-                <div class="password-wrapper">
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        class="form-control form-control-dark"
-                        placeholder="Enter your password"
-                        required
-                        autocomplete="current-password"
-                        style="padding-right: 48px !important;"
-                    >
-                    <button type="button" class="password-toggle" id="togglePwd" aria-label="Toggle password">👁️</button>
+                    <button type="submit" class="btn-login" id="loginBtn">
+                        <span id="loginBtnText">Enter</span>
+                    </button>
+                </form>
+
+                <div class="login-footer">
+                    Private community access &bull; Single session per ITS
                 </div>
             </div>
-
-            <button type="submit" class="btn-login" id="loginBtn">
-                <span id="loginBtnText">Sign In</span>
-            </button>
-        </form>
-
-        <div class="login-footer">
-            🔒 Secure authenticated access only &bull; No public registration
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Password toggle
-    document.getElementById('togglePwd').addEventListener('click', function() {
-        const pwd = document.getElementById('password');
-        const isText = pwd.type === 'text';
-        pwd.type = isText ? 'password' : 'text';
-        this.textContent = isText ? '👁️' : '🙈';
-    });
-
     // Disable button on submit
     document.getElementById('loginForm').addEventListener('submit', function() {
         const btn = document.getElementById('loginBtn');

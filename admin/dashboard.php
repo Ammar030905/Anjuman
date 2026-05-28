@@ -14,6 +14,7 @@ Auth::requireAdmin();
 $user = Auth::user();
 $db = Database::getInstance();
 $currentStream = getCurrentStream($db) ?? getLatestStream($db);
+$currentAttendanceCount = ($currentStream && !empty($currentStream['id'])) ? getStreamAttendanceCount($db, (int) $currentStream['id']) : 0;
 
 $metrics = $db->fetchOne(
     'SELECT
@@ -42,10 +43,9 @@ $logs = $db->fetchAll('SELECT l.action, l.timestamp, u.name AS username FROM act
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="<?= BASE_URL ?>/assets/css/style.css" rel="stylesheet">
     <link href="<?= BASE_URL ?>/assets/css/admin.css" rel="stylesheet">
+    <link href="<?= BASE_URL ?>/assets/css/admin-red.css" rel="stylesheet">
     <style>
-        body { background: transparent; }
 
-        .admin-wrap {
             max-width: 1480px;
             margin: 0 auto;
             padding: 22px 18px 30px;
@@ -171,14 +171,18 @@ $logs = $db->fetchAll('SELECT l.action, l.timestamp, u.name AS username FROM act
 <div class="admin-wrap">
     <header class="topbar slide-up">
         <div class="brand">
-            <div class="brand-logo">📡</div>
+            <div class="brand-logo">
+                <img src="<?= BASE_URL ?>/assets/images/logo-removebg-preview.png" alt="Anjuman logo" style="width:42px;height:42px;object-fit:contain;">
+            </div>
             <div>
-                <div class="fw-bold" style="font-size:1.15rem;"><?= e(APP_NAME) ?></div>
-                <div class="text-muted small">Embedded live stream control center</div>
+                <div class="fw-bold" style="font-size:1.05rem;">Anjuman E Ezzy</div>
+                <div class="text-muted small">Hatemi Mohallah, Rajkot — Relay Committee</div>
+                <div class="text-muted xsmall" style="font-size:.72rem">Ashara Mubaraka 1448</div>
             </div>
         </div>
         <div class="d-flex gap-2 flex-wrap align-items-center">
             <span class="badge bg-success-glow text-success border border-success-subtle px-3 py-2 rounded-pill">Welcome, <?= e($user['name']) ?></span>
+            <a href="<?= BASE_URL ?>/admin/attendance.php" class="btn btn-outline-light rounded-pill">Attendance</a>
             <a href="<?= BASE_URL ?>/admin/users.php" class="btn btn-outline-light rounded-pill">Users</a>
             <a href="<?= BASE_URL ?>/admin/streams.php" class="btn btn-danger rounded-pill">Streams</a>
             <a href="<?= BASE_URL ?>/logout.php" class="btn btn-dark rounded-pill">Logout</a>
@@ -205,6 +209,11 @@ $logs = $db->fetchAll('SELECT l.action, l.timestamp, u.name AS username FROM act
             <div class="metric-label">Live Streams</div>
             <div class="metric-value"><?= e($liveStreams) ?></div>
             <div class="text-muted small">Current active session</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Attendance</div>
+            <div class="metric-value"><?= e($currentAttendanceCount) ?></div>
+            <div class="text-muted small">Unique users on current stream</div>
         </div>
     </section>
 
@@ -253,6 +262,7 @@ $logs = $db->fetchAll('SELECT l.action, l.timestamp, u.name AS username FROM act
                     <h3 class="fw-bold mb-3">Quick Actions</h3>
                     <div class="d-grid gap-2">
                         <a href="<?= BASE_URL ?>/admin/streams.php" class="btn btn-danger">Manage Streams</a>
+                        <a href="<?= BASE_URL ?>/admin/notices.php" class="btn btn-outline-light">Manage Notices</a>
                         <a href="<?= BASE_URL ?>/admin/users.php" class="btn btn-outline-light">Manage Users</a>
                         <a href="<?= BASE_URL ?>/stream.php" class="btn btn-outline-light">Open Public Player</a>
                     </div>

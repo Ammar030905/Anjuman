@@ -9,6 +9,16 @@ require_once __DIR__ . '/db.php';
 
 class Auth {
 
+    private static function normalizeRole($role): string {
+        $role = strtolower(trim((string) $role));
+
+        if ($role === '1' || $role === 'admin' || $role === 'administrator' || $role === 'super admin') {
+            return 'admin';
+        }
+
+        return 'user';
+    }
+
     private static function hasUsersItsSchema(Database $db): bool {
         static $cached = null;
 
@@ -19,14 +29,41 @@ class Auth {
         return $db->columnExists('users', 'its_number') && $db->columnExists('users', 'phone');
     }
 
+    private static function ensureUsersSessionSchema(Database $db): bool {
+        try {
+            if ($db->columnExists('users', 'session_token') && $db->columnExists('users', 'last_login_at')) {
+                return true;
+            }
+
+            if ($db->isPostgres()) {
+                return $db->columnExists('users', 'session_token') && $db->columnExists('users', 'last_login_at');
+            }
+
+            if (!$db->columnExists('users', 'session_token')) {
+                $db->execute("ALTER TABLE users ADD COLUMN session_token CHAR(64) NULL AFTER status");
+            }
+
+            if (!$db->columnExists('users', 'last_login_at')) {
+                $db->execute("ALTER TABLE users ADD COLUMN last_login_at DATETIME NULL AFTER session_token");
+            }
+
+            return true;
+        } catch (Exception $e) {
+            error_log('Users session schema migration failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     public static function ensureUsersSchema(Database $db): bool {
         try {
             if ($db->isPostgres()) {
-                return self::hasUsersItsSchema($db);
+                return self::hasUsersItsSchema($db)
+                    && $db->columnExists('users', 'session_token')
+                    && $db->columnExists('users', 'last_login_at');
             }
 
             if (self::hasUsersItsSchema($db)) {
-                return true;
+                return self::ensureUsersSessionSchema($db);
             }
 
             $emailColumn = $db->columnExists('users', 'email');
@@ -70,7 +107,7 @@ class Auth {
                 // Ignore if the column was already removed.
             }
 
-            return self::hasUsersItsSchema($db);
+            return self::hasUsersItsSchema($db) && self::ensureUsersSessionSchema($db);
         } catch (Exception $e) {
             error_log('Users schema migration failed: ' . $e->getMessage());
             return false;
@@ -104,11 +141,11 @@ class Auth {
     }
 
     // ── Login ────────────────────────────────────────────────────────────────
-    public static function login(string $identifier, string $password): array {
+    public static function login(string $identifier): array {
         $db = Database::getInstance();
 
         if (!$db->isPostgres() && !self::ensureUsersSchema($db)) {
-            return ['success' => false, 'message' => 'Database schema migration could not be completed automatically. Please run database/migrate_users_to_its.sql and try again.'];
+            return ['success' => false, 'message' => 'Database schema migration could not be completed automatically. Please run database/schema.sql and try again.'];
         }
 
         $identifier = trim(strip_tags($identifier));
@@ -116,15 +153,21 @@ class Auth {
             return ['success' => false, 'message' => 'Invalid credentials.'];
         }
 
-        // Fetch user
+        // Fetch user by ITS number only.
         $user = $db->fetchOne(
-            "SELECT id, its_number, name, phone, password, role, status FROM users WHERE its_number = ? AND status = 1 LIMIT 1",
+            "SELECT id, its_number, name, phone, role, status, session_token FROM users WHERE its_number = ? AND status = 1 LIMIT 1",
             [$identifier]
         );
 
-        if (!$user || !password_verify($password, $user['password'])) {
+        if (!$user) {
             return ['success' => false, 'message' => 'Invalid credentials.'];
         }
+
+        if (self::normalizeRole($user['role']) === 'admin') {
+            return ['success' => false, 'message' => 'Admin accounts must sign in from the admin login page.'];
+        }
+
+        $sessionToken = bin2hex(random_bytes(32));
 
         // Regenerate session ID to prevent fixation
         session_regenerate_id(true);
@@ -133,13 +176,86 @@ class Auth {
         $_SESSION['user_name'] = $user['name'];
         $_SESSION['user_its_number'] = $user['its_number'];
         $_SESSION['user_phone'] = $user['phone'];
-        $_SESSION['user_role'] = $user['role'];
+        $_SESSION['user_role'] = self::normalizeRole($user['role']);
+        $_SESSION['user_session_token'] = $sessionToken;
         $_SESSION['last_activity'] = time();
+
+        try {
+            $db->execute(
+                'UPDATE users SET session_token = ?, last_login_at = NOW() WHERE id = ?',
+                [$sessionToken, (int) $user['id']]
+            );
+        } catch (Exception $e) {
+            error_log('Session token update failed: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Unable to create a secure login session. Please try again.'];
+        }
 
         // Log activity
         self::logActivity($user['id'], 'login');
 
-        return ['success' => true, 'role' => $user['role']];
+        return ['success' => true, 'role' => self::normalizeRole($user['role'])];
+    }
+
+    // ── Admin Login (ITS + password required) ─────────────────────────────
+    public static function adminLogin(string $identifier, string $password): array {
+        $db = Database::getInstance();
+
+        if (!$db->isPostgres() && !self::ensureUsersSchema($db)) {
+            return ['success' => false, 'message' => 'Database schema migration could not be completed automatically. Please run database/schema.sql and try again.'];
+        }
+
+        $identifier = trim(strip_tags($identifier));
+        if (!preg_match('/^\d{8}$/', $identifier) || $password === '') {
+            return ['success' => false, 'message' => 'Invalid credentials.'];
+        }
+
+        // Fetch admin user by ITS number only.
+        $user = $db->fetchOne(
+            "SELECT id, its_number, name, phone, role, status, session_token, password FROM users WHERE its_number = ? AND role = 'admin' AND status = 1 LIMIT 1",
+            [$identifier]
+        );
+
+        if (!$user) {
+            return ['success' => false, 'message' => 'Invalid credentials.'];
+        }
+
+        // Ensure admin account has a password set
+        if (empty($user['password'])) {
+            return ['success' => false, 'message' => 'Admin account has no password set. Please set a password in the database.'];
+        }
+
+        // Verify password using PHP's password_verify
+        if (!password_verify($password, (string) $user['password'])) {
+            return ['success' => false, 'message' => 'Invalid credentials.'];
+        }
+
+        $sessionToken = bin2hex(random_bytes(32));
+
+        // Regenerate session ID to prevent fixation
+        session_regenerate_id(true);
+
+        $_SESSION['user_id']   = $user['id'];
+        $_SESSION['user_name'] = $user['name'];
+        $_SESSION['user_its_number'] = $user['its_number'];
+        $_SESSION['user_phone'] = $user['phone'];
+        $_SESSION['user_role'] = self::normalizeRole($user['role']);
+        $_SESSION['user_session_token'] = $sessionToken;
+        $_SESSION['last_activity'] = time();
+
+        try {
+            $db->execute(
+                'UPDATE users SET session_token = ?, last_login_at = NOW() WHERE id = ?',
+                [$sessionToken, (int) $user['id']]
+            );
+        } catch (Exception $e) {
+            error_log('Session token update failed: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Unable to create a secure login session. Please try again.'];
+        }
+
+        // Log activity
+        self::logActivity($user['id'], 'admin_login');
+
+        return ['success' => true, 'role' => self::normalizeRole($user['role'])];
     }
 
     // ── Logout ───────────────────────────────────────────────────────────────
@@ -147,6 +263,15 @@ class Auth {
         self::startSession();
         if (isset($_SESSION['user_id'])) {
             self::logActivity($_SESSION['user_id'], 'logout');
+            try {
+                $db = Database::getInstance();
+                $db->execute(
+                    'UPDATE users SET session_token = NULL WHERE id = ? AND session_token = ?',
+                    [(int) $_SESSION['user_id'], (string) ($_SESSION['user_session_token'] ?? '')]
+                );
+            } catch (Exception $e) {
+                error_log('Session token clear failed: ' . $e->getMessage());
+            }
         }
         $_SESSION = [];
         if (ini_get('session.use_cookies')) {
@@ -165,6 +290,29 @@ class Auth {
             self::logout();
             return false;
         }
+
+        try {
+            $db = Database::getInstance();
+            $record = $db->fetchOne(
+                'SELECT session_token, status FROM users WHERE id = ? LIMIT 1',
+                [(int) $_SESSION['user_id']]
+            );
+
+            if (!$record || (int) ($record['status'] ?? 0) !== 1) {
+                self::logout();
+                return false;
+            }
+
+            $sessionToken = (string) ($_SESSION['user_session_token'] ?? '');
+            if ($sessionToken === '' || !hash_equals((string) ($record['session_token'] ?? ''), $sessionToken)) {
+                self::logout();
+                return false;
+            }
+        } catch (Exception $e) {
+            error_log('Session validation failed: ' . $e->getMessage());
+            return false;
+        }
+
         $_SESSION['last_activity'] = time();
         return true;
     }
@@ -180,7 +328,7 @@ class Auth {
     // ── Require Admin ────────────────────────────────────────────────────────
     public static function requireAdmin(): void {
         self::requireAuth();
-        if ($_SESSION['user_role'] !== 'admin') {
+        if (self::normalizeRole($_SESSION['user_role'] ?? '') !== 'admin') {
             header('Location: ' . BASE_URL . '/dashboard.php?error=forbidden');
             exit;
         }
@@ -189,7 +337,7 @@ class Auth {
     // ── Require User (redirect admins to admin panel) ────────────────────────
     public static function requireUser(): void {
         self::requireAuth();
-        if ($_SESSION['user_role'] === 'admin') {
+        if (self::normalizeRole($_SESSION['user_role'] ?? '') === 'admin') {
             header('Location: ' . BASE_URL . '/admin/dashboard.php');
             exit;
         }
@@ -208,7 +356,7 @@ class Auth {
     }
 
     public static function isAdmin(): bool {
-        return self::check() && $_SESSION['user_role'] === 'admin';
+        return self::check() && self::normalizeRole($_SESSION['user_role'] ?? '') === 'admin';
     }
 
     // ── Activity Logger ──────────────────────────────────────────────────────

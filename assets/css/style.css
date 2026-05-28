@@ -101,6 +101,25 @@ a {
 
 img { max-width: 100%; height: auto; }
 
+/* Logo display helpers */
+.site-title img,
+.brand-mark img,
+.brand-logo img {
+  display: block;
+  margin: 0 auto 10px;
+  background: transparent;
+  max-width: 120px;
+  width: auto;
+  height: auto;
+}
+
+.site-title h1 { margin-top: 6px; }
+
+/* Strong logo sizing to avoid SVG rasterization issues */
+.site-title img { width: 120px; height: 120px; object-fit: contain; }
+.brand-mark img { width: 56px; height: 56px; object-fit: contain; }
+.brand-logo img { width: 42px; height: 42px; object-fit: contain; }
+
 ::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-track { background: rgba(247, 242, 231, 0.6); }
 ::-webkit-scrollbar-thumb {

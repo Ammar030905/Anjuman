@@ -15,6 +15,11 @@ $user = Auth::user();
 $db = Database::getInstance();
 $stream = getCurrentStream($db) ?? getLatestStream($db);
 $hasStream = (bool) $stream;
+$dailyNotice = getActiveDailyNotice($db);
+
+if ($hasStream && ($stream['status'] ?? '') === 'live') {
+    recordStreamAttendance($db, $stream, $user, 'stream');
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -227,6 +232,42 @@ $hasStream = (bool) $stream;
             background: linear-gradient(135deg, var(--accent), var(--turquoise));
         }
 
+        .notice-card {
+            background: rgba(255, 252, 246, 0.82);
+            border: 1px solid rgba(183, 138, 58, 0.24);
+            border-radius: 22px;
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .notice-title {
+            font-family: var(--font-heading);
+            font-size: 1.15rem;
+            margin-bottom: 8px;
+            color: var(--accent);
+        }
+
+        .notice-meta {
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .notice-body {
+            color: var(--text-primary);
+            line-height: 1.7;
+            white-space: pre-line;
+        }
+
+        .notice-empty {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
         @media (max-width: 992px) {
             .watch-hero {
                 grid-template-columns: 1fr;
@@ -263,7 +304,18 @@ $hasStream = (bool) $stream;
             </div>
         </section>
 
-        <aside class="side-card slide-up" style="display:none;"></aside>
+        <aside class="side-card slide-up">
+            <div class="notice-card">
+                <div class="notice-meta">Daily Announcement</div>
+                <?php if ($dailyNotice): ?>
+                    <div class="notice-title"><?= e($dailyNotice['title'] ?? 'Announcement') ?></div>
+                    <div class="notice-body"><?= nl2br(e($dailyNotice['message'] ?? '')) ?></div>
+                    <div class="text-muted mt-3" style="font-size:0.75rem;">Updated <?= e(date('d M Y, h:i A', strtotime($dailyNotice['updated_at'] ?? 'now'))) ?></div>
+                <?php else: ?>
+                    <div class="notice-empty">No daily announcement has been posted yet.</div>
+                <?php endif; ?>
+            </div>
+        </aside>
     </div>
 </div>
 

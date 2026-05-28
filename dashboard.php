@@ -15,6 +15,12 @@ $user = Auth::user();
 $db = Database::getInstance();
 $stream = getCurrentStream($db) ?? getLatestStream($db);
 $hasStream = (bool) $stream;
+$attendanceCount = ($hasStream && !empty($stream['id'])) ? getStreamAttendanceCount($db, (int) $stream['id']) : 0;
+$dailyNotice = getActiveDailyNotice($db);
+
+if ($hasStream && ($stream['status'] ?? '') === 'live') {
+    recordStreamAttendance($db, $stream, $user, 'dashboard');
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -29,7 +35,6 @@ $hasStream = (bool) $stream;
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="<?= BASE_URL ?>/assets/css/style.css" rel="stylesheet">
     <style>
-        body { background: transparent; }
 
         .hero-shell {
             max-width: 1320px;
@@ -57,14 +62,21 @@ $hasStream = (bool) $stream;
         }
 
         .brand-mark {
-            width: 48px;
-            height: 48px;
+            width: 56px;
+            height: 56px;
             border-radius: 16px;
             display: grid;
             place-items: center;
-            background: linear-gradient(135deg, var(--accent), var(--turquoise));
-            box-shadow: 0 16px 36px rgba(11, 109, 88, 0.24);
-            font-size: 1.3rem;
+            overflow: hidden;
+            background: transparent;
+            flex-shrink: 0;
+        }
+
+        .brand-mark img {
+            width: 56px;
+            height: 56px;
+            object-fit: contain;
+            display: block;
         }
 
         .brand-title {
@@ -77,6 +89,37 @@ $hasStream = (bool) $stream;
         .brand-subtitle {
             color: var(--text-muted);
             font-size: 0.82rem;
+        }
+
+        .notice-panel {
+            background: rgba(255, 252, 246, 0.82);
+            border: 1px solid rgba(183, 138, 58, 0.24);
+            border-radius: 22px;
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 22px;
+        }
+
+        .notice-panel .notice-title {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .notice-panel .notice-meta {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .notice-panel .notice-body {
+            white-space: pre-line;
+            color: var(--text-primary);
+            line-height: 1.7;
         }
 
         .user-pill {
@@ -319,10 +362,13 @@ $hasStream = (bool) $stream;
 <div class="hero-shell">
     <header class="topbar slide-up">
         <div class="brand-block">
-            <div class="brand-mark">📺</div>
+            <div class="brand-mark">
+                <img src="<?= BASE_URL ?>/assets/images/logo-removebg-preview.png" alt="Anjuman logo">
+            </div>
             <div>
-                <h1 class="brand-title"><?= e(APP_NAME) ?></h1>
-                <div class="brand-subtitle">Hatemi Mohallah Jamiat</div>
+                <h1 class="brand-title">Anjuman E Ezzy</h1>
+                <div class="brand-subtitle">Hatemi Mohallah, Rajkot</div>
+                <div class="brand-sub small">Relay Committee &bull; Ashara Mubaraka 1448</div>
             </div>
         </div>
         <div class="d-flex align-items-center gap-3 flex-wrap">
@@ -356,6 +402,8 @@ $hasStream = (bool) $stream;
                     </button>
                 </div>
             </div>
+
+
             <div class="offline-state" id="streamOfflineState" style="<?= $hasStream && ($stream['status'] ?? '') === 'live' ? 'display:none;' : '' ?>">
                 <div class="offline-icon">📡</div>
                 <div class="badge-offline mb-3">⚫ OFFLINE</div>
@@ -364,7 +412,18 @@ $hasStream = (bool) $stream;
             </div>
         </section>
 
-        <aside class="panel slide-up" style="display:none;"></aside>
+        <aside class="panel slide-up">
+            <div class="notice-panel" style="border:none;border-radius:28px;margin-bottom:0;height:100%;box-sizing:border-box;">
+                <div class="notice-meta">📢 Daily Announcement</div>
+                <?php if ($dailyNotice): ?>
+                    <div class="notice-title"><?= e($dailyNotice['title'] ?? 'Announcement') ?></div>
+                    <div class="notice-body"><?= nl2br(e($dailyNotice['message'] ?? '')) ?></div>
+                    <div class="notice-meta" style="margin-top:14px;"><?= e(date('d M Y', strtotime($dailyNotice['notice_date'] ?? 'now'))) ?></div>
+                <?php else: ?>
+                    <div class="text-muted" style="font-size:.9rem;">No announcement has been posted yet.</div>
+                <?php endif; ?>
+            </div>
+        </aside>
     </div>
 </div>
 

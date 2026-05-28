@@ -24,9 +24,8 @@ $user = Auth::user();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="<?= BASE_URL ?>/assets/css/style.css" rel="stylesheet">
     <link href="<?= BASE_URL ?>/assets/css/admin.css" rel="stylesheet">
+    <link href="<?= BASE_URL ?>/assets/css/admin-red.css" rel="stylesheet">
     <style>
-        body { background: transparent; }
-
         .admin-wrap {
             max-width: 1480px;
             margin: 0 auto;
@@ -91,13 +90,17 @@ $user = Auth::user();
 <div class="admin-wrap">
     <header class="topbar slide-up">
         <div class="brand">
-            <div class="brand-logo">👥</div>
+            <div class="brand-logo">
+                <img src="<?= BASE_URL ?>/assets/images/logo-removebg-preview.png" alt="Anjuman logo" style="width:46px;height:46px;object-fit:contain;">
+            </div>
             <div>
-                <div class="fw-bold" style="font-size:1.15rem;"><?= e(APP_NAME) ?></div>
-                <div class="text-muted small">Admin user management</div>
+                <div class="fw-bold" style="font-size:1.05rem;">Anjuman E Ezzy</div>
+                <div class="text-muted small">Hatemi Mohallah, Rajkot — Relay Committee</div>
+                <div class="text-muted xsmall" style="font-size:.72rem">Ashara Mubaraka 1448</div>
             </div>
         </div>
         <div class="d-flex gap-2 flex-wrap">
+            <a href="<?= BASE_URL ?>/admin/attendance.php" class="btn btn-outline-light rounded-pill">Attendance</a>
             <a href="<?= BASE_URL ?>/admin/dashboard.php" class="btn btn-outline-light rounded-pill">Dashboard</a>
             <a href="<?= BASE_URL ?>/admin/streams.php" class="btn btn-outline-light rounded-pill">Streams</a>
             <button type="button" class="btn btn-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#createUserModal">Create User</button>
@@ -159,10 +162,6 @@ $user = Auth::user();
                         <input type="text" class="form-control form-control-dark" id="phone" name="phone" maxlength="15" placeholder="Enter phone number" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label-dark" for="password">Password</label>
-                        <input type="password" class="form-control form-control-dark" id="password" name="password" required>
-                    </div>
-                    <div class="mb-3">
                         <label class="form-label-dark" for="role">Role</label>
                         <select class="form-select form-select-dark" id="role" name="role">
                             <option value="user">User</option>
@@ -208,10 +207,6 @@ $user = Auth::user();
                     <div class="mb-3">
                         <label class="form-label-dark" for="edit_phone">Phone Number</label>
                         <input type="text" class="form-control form-control-dark" id="edit_phone" name="edit_phone" maxlength="15" placeholder="Enter phone number" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label-dark" for="edit_password">New Password</label>
-                        <input type="password" class="form-control form-control-dark" id="edit_password" name="edit_password" placeholder="Leave blank to keep current password">
                     </div>
                     <div class="mb-3">
                         <label class="form-label-dark" for="edit_role">Role</label>
