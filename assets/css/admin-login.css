@@ -13,6 +13,11 @@ body.admin-login{
 .login-card-admin{
     width:100%;max-width:440px;background:#fff;border:1px solid rgba(181,23,31,0.12);border-radius:16px;padding:28px;box-shadow:0 18px 46px rgba(181,23,31,0.12);
 }
+
+/* Center wrapper to keep logo and card aligned */
+.admin-login-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;}
+.admin-login-wrap .top-logo{width:100%;text-align:center}
+.login-card-admin{margin:0 auto}
 .login-card-admin .brand-title{color:var(--admin-accent);font-weight:800;margin-bottom:6px}
 .login-card-admin .brand-sub{color:var(--admin-accent-dark);font-weight:600;margin-bottom:10px}
 

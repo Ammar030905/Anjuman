@@ -353,7 +353,7 @@ $csrfField = CSRF::field();
 <div class="login-page">
     <div class="login-shell">
         <div class="site-title">
-            <img src="<?= BASE_URL ?>/assets/images/logo.svg" alt="Anjuman logo" style="width:84px;height:84px;object-fit:contain;margin-bottom:10px;" onerror="this.style.display='none'">
+            <img src="<?= BASE_URL ?>/assets/images/WhatsApp_Image_2026-05-28_at_16.29.32__1_-removebg-preview.png" alt="Main Anjuman logo" style="width:128px;height:auto;object-fit:contain;margin-bottom:10px;" onerror="this.style.display='none'">
             <h1>Anjuman E Ezzy</h1>
             <div class="eyebrow">Hatemi Mohallah, Rajkot</div>
             <div class="eyebrow" style="font-size:0.92rem;margin-top:6px;">Relay Committee &middot; Ashara Mubaraka 1448</div>
