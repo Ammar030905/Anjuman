@@ -78,6 +78,7 @@ if ($action === 'create') {
     $name = sanitizeInput($_POST['name'] ?? '');
     $phone = trim(sanitizeInput($_POST['phone'] ?? ''));
     $role = sanitizeInput($_POST['role'] ?? 'user');
+    $adminPassword = (string) ($_POST['admin_password'] ?? '');
     $status = (int) ($_POST['status'] ?? 1);
 
     if (!$itsNumber || !$name || !$phone) {
@@ -96,14 +97,20 @@ if ($action === 'create') {
         jsonResponse(['success' => false, 'message' => 'Invalid role selected.']);
     }
 
+    if ($role === 'admin' && strlen(trim($adminPassword)) < 6) {
+        jsonResponse(['success' => false, 'message' => 'Admin password is required and must be at least 6 characters.']);
+    }
+
     try {
         if ($db->fetchOne('SELECT id FROM users WHERE its_number = ? LIMIT 1', [$itsNumber])) {
             jsonResponse(['success' => false, 'message' => 'ITS number already exists.']);
         }
 
+        $storedPassword = $role === 'admin' ? password_hash(trim($adminPassword), PASSWORD_DEFAULT) : '';
+
         $db->insert(
             'INSERT INTO users (its_number, name, phone, password, role, status, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
-            [$itsNumber, $name, $phone, '', $role, $status === 0 ? 0 : 1]
+            [$itsNumber, $name, $phone, $storedPassword, $role, $status === 0 ? 0 : 1]
         );
 
         Auth::logActivity((int) $_SESSION['user_id'], 'Created user account: ' . $name . ' (ITS: ' . $itsNumber . ')');

@@ -133,6 +133,34 @@ $csrfField = CSRF::field();
             padding: 22px 18px 28px;
         }
 
+        .login-warning {
+            width: 100%;
+            max-width: 760px;
+            position: sticky;
+            top: 14px;
+            z-index: 5;
+            background: linear-gradient(180deg, rgba(255, 238, 238, 0.98) 0%, rgba(255, 246, 246, 0.96) 100%);
+            border: 1px solid rgba(181, 23, 31, 0.32);
+            border-left: 5px solid #b5171f;
+            color: #7f0f13;
+            border-radius: 16px;
+            padding: 14px 16px;
+            box-shadow: 0 14px 30px rgba(181, 23, 31, 0.10);
+            text-align: center;
+            font-size: 0.98rem;
+            line-height: 1.65;
+            font-weight: 700;
+        }
+
+        .login-warning strong {
+            display: block;
+            font-size: 0.78rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            color: #b5171f;
+        }
+
         .site-title {
             text-align: center;
             color: var(--accent);
@@ -329,6 +357,11 @@ $csrfField = CSRF::field();
             <h1>Anjuman E Ezzy</h1>
             <div class="eyebrow">Hatemi Mohallah, Rajkot</div>
             <div class="eyebrow" style="font-size:0.92rem;margin-top:6px;">Relay Committee &middot; Ashara Mubaraka 1448</div>
+        </div>
+
+        <div class="login-warning" role="alert" aria-live="polite">
+            <strong>Important Notice</strong>
+            આ એપ્લિકેશન માં એક ટાઈમ પર એક જ મુમિન લોગીન થઇ શકે છે. અગર જો સેમ ITS નંબર થી બીજું લોગીન કરવા માં આવશે તો પહેલું ઑટોમૅટિક લોગૉઉટ થઇ જશે એહનું ખાસ ખ્યાલ રાખવું.
         </div>
 
         <div class="card-wrap">

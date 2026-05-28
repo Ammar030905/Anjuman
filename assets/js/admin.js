@@ -82,11 +82,34 @@ const UserManager = {
     },
 
     bindForms() {
-        document.getElementById('createUserForm')?.addEventListener('submit', (event) => {
+        const createForm = document.getElementById('createUserForm');
+        const roleSelect = document.getElementById('role');
+        const adminPasswordField = document.getElementById('adminPasswordField');
+        const adminPasswordInput = document.getElementById('admin_password');
+
+        const syncAdminPasswordField = () => {
+            if (!roleSelect || !adminPasswordField || !adminPasswordInput) return;
+
+            const isAdmin = roleSelect.value === 'admin';
+            adminPasswordField.classList.toggle('d-none', !isAdmin);
+            adminPasswordInput.required = isAdmin;
+            adminPasswordInput.disabled = !isAdmin;
+
+            if (!isAdmin) {
+                adminPasswordInput.value = '';
+            }
+        };
+
+        roleSelect?.addEventListener('change', syncAdminPasswordField);
+        syncAdminPasswordField();
+
+        createForm?.addEventListener('submit', (event) => {
             event.preventDefault();
             const form = event.target;
             const itsNumber = form.its_number.value.trim();
             const phone = form.phone.value.trim().replace(/\s+/g, '');
+            const role = form.role.value;
+            const adminPassword = (form.admin_password?.value || '').trim();
 
             if (!/^\d{8}$/.test(itsNumber)) {
                 Toast.error('Validation', 'ITS number must be exactly 8 digits.');
@@ -98,12 +121,18 @@ const UserManager = {
                 return;
             }
 
+            if (role === 'admin' && adminPassword.length < 6) {
+                Toast.error('Validation', 'Admin password is required and must be at least 6 characters.');
+                return;
+            }
+
             const data = {
                 action: 'create',
                 its_number: itsNumber,
                 name: form.name.value.trim(),
                 phone,
-                role: form.role.value,
+                role,
+                admin_password: adminPassword,
                 status: form.status.value,
             };
 
@@ -117,6 +146,7 @@ const UserManager = {
                 if (resp.success) {
                     Toast.success('Created', resp.message);
                     form.reset();
+                    syncAdminPasswordField();
                     bootstrap.Modal.getInstance(document.getElementById('createUserModal'))?.hide();
                     this.load();
                     return;

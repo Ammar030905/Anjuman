@@ -168,6 +168,11 @@ $user = Auth::user();
                             <option value="admin">Admin</option>
                         </select>
                     </div>
+                    <div class="mb-3 d-none" id="adminPasswordField">
+                        <label class="form-label-dark" for="admin_password">Admin Password</label>
+                        <input type="password" class="form-control form-control-dark" id="admin_password" name="admin_password" minlength="6" placeholder="Enter admin password">
+                        <small class="text-muted d-block mt-2">Required only when role is Admin.</small>
+                    </div>
                     <div class="mb-0">
                         <label class="form-label-dark" for="status">Status</label>
                         <select class="form-select form-select-dark" id="status" name="status">
