@@ -145,6 +145,8 @@ function confirmAction(message, onConfirm) {
 const StreamViewer = (() => {
     let timerId = null;
     let statusUrl = '';
+    let currentEmbedUrl = '';
+    let currentStatus = '';
 
     function setBadge(status) {
         const badges = document.querySelectorAll('#stream-status-badge');
@@ -230,21 +232,31 @@ const StreamViewer = (() => {
         }
 
         if (status === 'live' && embedUrl) {
-            frame.src = embedUrl;
+            if (currentStatus !== 'live' || currentEmbedUrl !== embedUrl) {
+                frame.src = embedUrl;
+                currentEmbedUrl = embedUrl;
+            }
+
             shell.style.display = 'block';
             offline.style.display = 'none';
             if (mask) mask.style.display = 'block';
             if (overlay) overlay.style.display = 'flex';
+            currentStatus = 'live';
             updateFullscreenLabel();
             return;
         }
 
-        frame.src = 'about:blank';
+        if (currentStatus !== 'offline') {
+            frame.src = 'about:blank';
+            currentEmbedUrl = '';
+        }
+
         shell.style.display = 'none';
         offline.style.display = 'flex';
         if (mask) mask.style.display = 'none';
         if (overlay) overlay.style.display = 'none';
         if (fullscreenBtn) fullscreenBtn.textContent = '⛶ Fullscreen';
+        currentStatus = 'offline';
     }
 
     function update(resp) {
