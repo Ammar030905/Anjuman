@@ -70,6 +70,28 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
             border: 0;
         }
 
+        .player-frame-shell:fullscreen,
+        .player-frame-shell:-webkit-full-screen {
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            aspect-ratio: auto;
+            border-radius: 0;
+        }
+
+        .player-frame-shell:fullscreen iframe,
+        .player-frame-shell:-webkit-full-screen iframe {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .player-frame-shell:fullscreen .stream-live-overlay,
+        .player-frame-shell:-webkit-full-screen .stream-live-overlay {
+            left: 12px;
+            right: 12px;
+            bottom: max(12px, env(safe-area-inset-bottom));
+        }
+
         .stream-live-overlay {
             position: absolute;
             left: 16px;

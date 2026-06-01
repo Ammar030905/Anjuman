@@ -147,6 +147,8 @@ const StreamViewer = (() => {
     let statusUrl = '';
     let currentEmbedUrl = '';
     let currentStatus = '';
+    let offlinePollCount = 0;
+    const OFFLINE_CONFIRM_POLLS = 2;
 
     function setBadge(status) {
         const badges = document.querySelectorAll('#stream-status-badge');
@@ -246,11 +248,6 @@ const StreamViewer = (() => {
             return;
         }
 
-        if (currentStatus !== 'offline') {
-            frame.src = 'about:blank';
-            currentEmbedUrl = '';
-        }
-
         shell.style.display = 'none';
         offline.style.display = 'flex';
         if (mask) mask.style.display = 'none';
@@ -260,8 +257,27 @@ const StreamViewer = (() => {
     }
 
     function update(resp) {
-        setBadge(resp.status || 'offline');
-        setPlayer(resp.embed_url || '', resp.status || 'offline');
+        const status = resp.status || 'offline';
+        const embedUrl = resp.embed_url || '';
+
+        if (status === 'live' && embedUrl) {
+            offlinePollCount = 0;
+            setBadge('live');
+            setPlayer(embedUrl, 'live');
+            return;
+        }
+
+        // Avoid brief black flickers when one poll transiently reports offline.
+        if (currentStatus === 'live') {
+            offlinePollCount += 1;
+            if (offlinePollCount < OFFLINE_CONFIRM_POLLS) {
+                return;
+            }
+        }
+
+        offlinePollCount = 0;
+        setBadge('offline');
+        setPlayer('', 'offline');
     }
 
     function poll() {
