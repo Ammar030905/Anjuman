@@ -172,12 +172,25 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
             position: relative;
             aspect-ratio: 16 / 9;
             background: #000;
+            overflow: hidden;
         }
 
         .player-frame-shell iframe {
+            position: absolute;
+            top: 50%;
+            left: 50%;
             width: 100%;
             height: 100%;
+            transform: translate(-50%, -50%) scale(1.35);
             border: 0;
+        }
+
+        .player-click-guard {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            background: transparent;
+            cursor: default;
         }
 
         .stream-live-overlay {
@@ -186,7 +199,7 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
             right: 16px;
             bottom: 16px;
             z-index: 3;
-            display: none;
+            display: flex;
             align-items: flex-end;
             justify-content: space-between;
             gap: 12px;
@@ -392,6 +405,7 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
                     allow="autoplay; encrypted-media; fullscreen"
                     allowfullscreen
                     title="Live stream player"></iframe>
+                <div class="player-click-guard"></div>
                 <div class="stream-chrome-mask" id="streamChromeMask"></div>
                 <div class="stream-live-overlay">
                     <span id="stream-status-badge" class="<?= $hasStream && ($stream['status'] ?? '') === 'live' ? 'badge-live' : 'badge-offline' ?>">
@@ -430,5 +444,53 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="<?= BASE_URL ?>/assets/js/main.js"></script>
+<script>
+var ytPlayer = null;
+
+window.initYTPlayer = function () {
+    var frame = document.getElementById('streamPlayerFrame');
+    if (!frame || !frame.src || frame.src === 'about:blank') return;
+    // If player already bound, just force play
+    if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
+        try { ytPlayer.playVideo(); } catch(e) {}
+        return;
+    }
+    ytPlayer = new YT.Player('streamPlayerFrame', {
+        events: {
+            onReady: function (e) {
+                e.target.playVideo();
+            },
+            onStateChange: function (e) {
+                // 2 = paused, 5 = cued — force resume immediately
+                if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.CUED) {
+                    setTimeout(function () {
+                        try { e.target.playVideo(); } catch(err) {}
+                    }, 200);
+                }
+            },
+            onError: function () {
+                // On error, reload src after 3s to reconnect
+                setTimeout(function () {
+                    var f = document.getElementById('streamPlayerFrame');
+                    if (f && f.src && f.src !== 'about:blank') {
+                        ytPlayer = null;
+                        var src = f.src;
+                        f.src = 'about:blank';
+                        setTimeout(function () { f.src = src; }, 500);
+                    }
+                }, 3000);
+            }
+        }
+    });
+};
+
+window.onYouTubeIframeAPIReady = function () {
+    window.initYTPlayer();
+};
+
+var tag = document.createElement('script');
+tag.src = 'https://www.youtube.com/iframe_api';
+document.head.appendChild(tag);
+</script>
 </body>
 </html>

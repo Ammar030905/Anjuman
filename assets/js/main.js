@@ -237,12 +237,18 @@ const StreamViewer = (() => {
             if (currentStatus !== 'live' || currentEmbedUrl !== embedUrl) {
                 frame.src = embedUrl;
                 currentEmbedUrl = embedUrl;
+                // Re-bind YT API after src change
+                window.setTimeout(() => {
+                    if (typeof window.initYTPlayer === 'function') window.initYTPlayer();
+                }, 1500);
+            } else {
+                // Already live — just force play if API is ready
+                if (typeof window.initYTPlayer === 'function') window.initYTPlayer();
             }
 
             shell.style.display = 'block';
             offline.style.display = 'none';
             if (mask) mask.style.display = 'block';
-            if (overlay) overlay.style.display = 'flex';
             currentStatus = 'live';
             updateFullscreenLabel();
             return;
@@ -251,7 +257,6 @@ const StreamViewer = (() => {
         shell.style.display = 'none';
         offline.style.display = 'flex';
         if (mask) mask.style.display = 'none';
-        if (overlay) overlay.style.display = 'none';
         if (fullscreenBtn) fullscreenBtn.textContent = '⛶ Fullscreen';
         currentStatus = 'offline';
     }
@@ -294,6 +299,16 @@ const StreamViewer = (() => {
     function init(url) {
         statusUrl = url || document.body.dataset.streamStatusUrl || '';
         if (!statusUrl) return;
+
+        // Seed current state from what PHP already rendered so the first poll
+        // does not reset an already-playing iframe.
+        const frame = document.getElementById('streamPlayerFrame');
+        const shell = document.getElementById('streamPlayerShell');
+        if (frame && shell && shell.style.display !== 'none') {
+            currentStatus = 'live';
+            currentEmbedUrl = frame.src || '';
+        }
+
         poll();
         timerId = window.setInterval(poll, 15000);
     }

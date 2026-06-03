@@ -70,6 +70,18 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
             border: 0;
         }
 
+        .stream-top-click-shield {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 2;
+            background: transparent;
+            pointer-events: auto;
+            touch-action: none;
+        }
+
         .player-frame-shell:fullscreen,
         .player-frame-shell:-webkit-full-screen {
             width: 100vw;
@@ -83,6 +95,11 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
         .player-frame-shell:-webkit-full-screen iframe {
             width: 100vw;
             height: 100vh;
+        }
+
+        .player-frame-shell:fullscreen .stream-top-click-shield,
+        .player-frame-shell:-webkit-full-screen .stream-top-click-shield {
+            inset: 0;
         }
 
         .player-frame-shell:fullscreen .stream-live-overlay,
@@ -308,6 +325,7 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
                     allow="autoplay; encrypted-media; fullscreen"
                     allowfullscreen
                     title="Live stream player"></iframe>
+                <div class="stream-top-click-shield" aria-hidden="true"></div>
                 <div class="stream-chrome-mask" id="streamChromeMask"></div>
                 <div class="stream-live-overlay">
                     <span id="stream-status-badge" class="<?= $hasStream && ($stream['status'] ?? '') === 'live' ? 'badge-live' : 'badge-offline' ?>">

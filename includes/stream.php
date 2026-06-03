@@ -137,7 +137,7 @@ function extractYouTubeVideoId(string $input): ?string {
 }
 
 function buildYouTubeEmbedUrl(string $videoId): string {
-    return 'https://www.youtube-nocookie.com/embed/' . rawurlencode($videoId) . '?autoplay=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1&fs=0&disablekb=1&origin=' . rawurlencode(BASE_URL);
+    return 'https://www.youtube-nocookie.com/embed/' . rawurlencode($videoId) . '?autoplay=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1&fs=0&disablekb=1&enablejsapi=1&origin=' . rawurlencode(BASE_URL);
 }
 
 function getCurrentStream(?Database $db = null): ?array {
