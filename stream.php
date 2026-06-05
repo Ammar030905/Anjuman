@@ -61,6 +61,7 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
         .player-frame-shell {
             position: relative;
             aspect-ratio: 16 / 9;
+            width: 100%;
             background: #000;
         }
 
@@ -68,6 +69,8 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
             width: 100%;
             height: 100%;
             border: 0;
+            pointer-events: none;
+            touch-action: none;
         }
 
         .stream-top-click-shield {
@@ -93,8 +96,13 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
 
         .player-frame-shell:fullscreen iframe,
         .player-frame-shell:-webkit-full-screen iframe {
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
+        }
+
+        .player-frame-shell iframe {
+            display: block;
+            background: #000;
         }
 
         .player-frame-shell:fullscreen .stream-top-click-shield,
@@ -143,32 +151,6 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
         .player-action-btn:focus {
             outline: 2px solid rgba(255, 255, 255, 0.75);
             outline-offset: 2px;
-        }
-
-        .stream-chrome-mask {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            display: none;
-        }
-
-        .stream-chrome-mask::before,
-        .stream-chrome-mask::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            right: 0;
-            background: #000;
-        }
-
-        .stream-chrome-mask::before {
-            top: 0;
-            height: 74px;
-        }
-
-        .stream-chrome-mask::after {
-            bottom: 0;
-            height: 100px;
         }
 
         .offline-state {
@@ -311,6 +293,32 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
             .watch-hero {
                 grid-template-columns: 1fr;
             }
+
+            .player-card {
+                border-radius: 22px;
+            }
+
+            .player-frame-shell {
+                aspect-ratio: 16 / 9;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .watch-shell {
+                padding: 10px 10px 20px;
+            }
+
+            .player-card,
+            .side-card {
+                border-radius: 18px;
+            }
+
+            .stream-live-overlay {
+                left: 10px;
+                right: 10px;
+                bottom: 10px;
+            }
         }
     </style>
 </head>
@@ -326,7 +334,6 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
                     allowfullscreen
                     title="Live stream player"></iframe>
                 <div class="stream-top-click-shield" aria-hidden="true"></div>
-                <div class="stream-chrome-mask" id="streamChromeMask"></div>
                 <div class="stream-live-overlay">
                     <span id="stream-status-badge" class="<?= $hasStream && ($stream['status'] ?? '') === 'live' ? 'badge-live' : 'badge-offline' ?>">
                         <?= $hasStream && ($stream['status'] ?? '') === 'live' ? '<span class="live-dot"></span> LIVE' : '⚫ OFFLINE' ?>

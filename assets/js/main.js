@@ -170,7 +170,6 @@ const StreamViewer = (() => {
         const frame = document.getElementById('streamPlayerFrame');
         const shell = document.getElementById('streamPlayerShell');
         const offline = document.getElementById('streamOfflineState');
-        const mask = document.getElementById('streamChromeMask');
         const overlay = document.querySelector('.stream-live-overlay');
         const fullscreenBtn = document.getElementById('streamFullscreenBtn');
 
@@ -248,7 +247,6 @@ const StreamViewer = (() => {
 
             shell.style.display = 'block';
             offline.style.display = 'none';
-            if (mask) mask.style.display = 'block';
             currentStatus = 'live';
             updateFullscreenLabel();
             return;
@@ -256,7 +254,6 @@ const StreamViewer = (() => {
 
         shell.style.display = 'none';
         offline.style.display = 'flex';
-        if (mask) mask.style.display = 'none';
         if (fullscreenBtn) fullscreenBtn.textContent = '⛶ Fullscreen';
         currentStatus = 'offline';
     }
