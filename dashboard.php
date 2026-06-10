@@ -200,17 +200,6 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
             overflow: hidden;
         }
 
-        .player-frame-shell iframe {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            border: 0;
-            display: block;
-            background: #000;
-            pointer-events: none;
-        }
-
         .player-frame-shell:fullscreen,
         .player-frame-shell:-webkit-full-screen {
             width: 100vw;
@@ -231,15 +220,6 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
             left: 12px;
             right: 12px;
             bottom: max(12px, env(safe-area-inset-bottom));
-        }
-
-        .player-click-guard {
-            position: absolute;
-            inset: 0;
-            z-index: 2;
-            background: transparent;
-            cursor: default;
-            touch-action: none;
         }
 
         .stream-live-overlay {
@@ -501,14 +481,16 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
 
     <div class="hero-grid">
         <section class="panel slide-up">
-            <div class="player-frame-shell" id="streamPlayerShell" style="<?= $hasStream && ($stream['status'] ?? '') === 'live' ? '' : 'display:none;' ?>">
+            <div class="player-frame-shell yt-embed-locked" id="streamPlayerShell" style="<?= $hasStream && ($stream['status'] ?? '') === 'live' ? '' : 'display:none;' ?>">
                 <iframe
                     id="streamPlayerFrame"
                     src="<?= $hasStream && ($stream['status'] ?? '') === 'live' ? e($stream['embed_url']) : 'about:blank' ?>"
-                    allow="autoplay; encrypted-media; fullscreen"
-                    allowfullscreen
+                    allow="autoplay; encrypted-media"
                     title="Live stream player"></iframe>
-                <div class="player-click-guard"></div>
+                <div class="yt-ui-shield yt-ui-shield-top" aria-hidden="true"></div>
+                <div class="yt-ui-shield yt-ui-shield-bottom" aria-hidden="true"></div>
+                <div class="yt-ui-shield yt-ui-shield-logo" aria-hidden="true"></div>
+                <div class="player-click-guard" aria-hidden="true"></div>
                 <div class="stream-live-overlay">
                     <span id="stream-status-badge" class="<?= $hasStream && ($stream['status'] ?? '') === 'live' ? 'badge-live' : 'badge-offline' ?>">
                         <?= $hasStream && ($stream['status'] ?? '') === 'live' ? '<span class="live-dot"></span> LIVE' : '⚫ OFFLINE' ?>

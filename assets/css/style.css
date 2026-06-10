@@ -404,6 +404,76 @@ h1, h2, h3, h4, h5, h6 {
   border: 0;
 }
 
+/* YouTube embed lockdown — hide chrome & block outbound navigation */
+.yt-embed-locked {
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+.yt-embed-locked iframe {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 110%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  display: block;
+  background: #000;
+  pointer-events: none !important;
+  touch-action: none;
+}
+
+.yt-ui-shield {
+  position: absolute;
+  z-index: 2;
+  pointer-events: auto;
+  touch-action: none;
+  background: #000;
+}
+
+.yt-ui-shield-top {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: clamp(44px, 8vw, 58px);
+}
+
+.yt-ui-shield-bottom {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: clamp(34px, 6vw, 46px);
+}
+
+.yt-ui-shield-logo {
+  bottom: 0;
+  right: 0;
+  width: clamp(90px, 20vw, 128px);
+  height: clamp(42px, 8vw, 58px);
+}
+
+.yt-embed-locked .player-click-guard,
+.yt-embed-locked .stream-top-click-shield {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: transparent;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: default;
+}
+
+.yt-embed-locked:fullscreen iframe,
+.yt-embed-locked:-webkit-full-screen iframe,
+.player-frame-shell:fullscreen.yt-embed-locked iframe,
+.player-frame-shell:-webkit-full-screen.yt-embed-locked iframe {
+  height: 100%;
+  top: 0;
+  transform: none;
+}
+
 .player-offline {
   position: absolute;
   inset: 0;

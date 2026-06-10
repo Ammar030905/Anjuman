@@ -380,6 +380,26 @@ window.ajaxGet = ajaxGet;
 window.confirmAction = confirmAction;
 window.copyToClipboard = copyToClipboard;
 
+function initYouTubeEmbedLockdown() {
+    document.querySelectorAll('.yt-embed-locked').forEach((shell) => {
+        if (shell.dataset.lockdownBound === 'true') return;
+        shell.dataset.lockdownBound = 'true';
+
+        const blockInteraction = (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+        };
+
+        shell.addEventListener('contextmenu', blockInteraction);
+
+        shell.querySelectorAll('.player-click-guard, .stream-top-click-shield, .yt-ui-shield').forEach((element) => {
+            element.addEventListener('click', blockInteraction);
+            element.addEventListener('dblclick', blockInteraction);
+            element.addEventListener('pointerdown', blockInteraction);
+        });
+    });
+}
+
 function initScrollAnimations() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
@@ -393,6 +413,7 @@ function initScrollAnimations() {
 }
 
 $(function () {
+    initYouTubeEmbedLockdown();
     initScrollAnimations();
     if (document.body.dataset.sessionStatusUrl) {
         SessionGuard.init(document.body.dataset.sessionStatusUrl);
