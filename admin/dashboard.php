@@ -45,10 +45,11 @@ $logs = $db->fetchAll('SELECT l.action, l.timestamp, u.name AS username FROM act
     <link href="<?= BASE_URL ?>/assets/css/admin.css" rel="stylesheet">
     <link href="<?= BASE_URL ?>/assets/css/admin-red.css" rel="stylesheet">
     <style>
-
+        .admin-wrap {
             max-width: 1480px;
             margin: 0 auto;
-            padding: 22px 18px 30px;
+            padding: clamp(20px, 4vw, 28px) clamp(18px, 4vw, 24px) clamp(28px, 5vw, 36px);
+            width: 100%;
         }
 
         .topbar {
@@ -156,13 +157,48 @@ $logs = $db->fetchAll('SELECT l.action, l.timestamp, u.name AS username FROM act
         }
 
         @media (max-width: 768px) {
+            .admin-wrap {
+                padding: 16px 16px 28px;
+            }
+
             .metrics-grid {
                 grid-template-columns: 1fr;
+                gap: 12px;
+                margin: 14px 0;
             }
 
             .topbar {
                 flex-direction: column;
-                align-items: flex-start;
+                align-items: stretch;
+                padding: 16px;
+                gap: 14px;
+            }
+
+            .topbar .d-flex {
+                width: 100%;
+            }
+
+            .topbar .btn,
+            .topbar .badge {
+                flex: 1 1 auto;
+                text-align: center;
+            }
+
+            .metric-card {
+                padding: 16px;
+            }
+
+            .metric-value {
+                font-size: 1.65rem;
+            }
+
+            .section-body {
+                padding: 16px;
+            }
+
+            .offline-state {
+                min-height: 240px;
+                padding: 20px 16px;
             }
         }
     </style>

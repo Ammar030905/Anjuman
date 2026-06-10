@@ -35,11 +35,17 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="<?= BASE_URL ?>/assets/css/style.css" rel="stylesheet">
     <style>
+        body {
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
 
         .hero-shell {
             max-width: 1320px;
             margin: 0 auto;
-            padding: 28px 20px 40px;
+            padding: clamp(20px, 4vw, 32px) clamp(18px, 4vw, 28px) clamp(28px, 5vw, 48px);
+            width: 100%;
         }
 
         .topbar {
@@ -47,8 +53,8 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
             align-items: center;
             justify-content: space-between;
             gap: 16px;
-            padding: 16px 20px;
-            margin-bottom: 28px;
+            padding: 18px 22px;
+            margin-bottom: 24px;
             background: rgba(255, 251, 242, 0.64);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(183, 138, 58, 0.25);
@@ -122,14 +128,31 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
             line-height: 1.7;
         }
 
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
         .user-pill {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 8px 14px 8px 8px;
+            padding: 10px 16px 10px 10px;
             border-radius: 999px;
             background: rgba(255, 253, 246, 0.65);
             border: 1px solid rgba(183, 138, 58, 0.24);
+            min-width: 0;
+        }
+
+        .user-pill .user-meta {
+            min-width: 0;
+        }
+
+        .user-pill .user-meta small {
+            display: block;
+            word-break: break-word;
         }
 
         .avatar {
@@ -155,8 +178,9 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
 
         .hero-grid {
             display: grid;
-            grid-template-columns: 1.6fr 0.9fr;
+            grid-template-columns: minmax(0, 1.6fr) minmax(0, 0.9fr);
             gap: 22px;
+            align-items: start;
         }
 
         .panel {
@@ -166,6 +190,7 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
             border-radius: 28px;
             overflow: hidden;
             box-shadow: 0 30px 80px rgba(9, 37, 31, 0.16);
+            min-width: 0;
         }
 
         .player-frame-shell {
@@ -177,12 +202,35 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
 
         .player-frame-shell iframe {
             position: absolute;
-            top: 50%;
-            left: 50%;
+            inset: 0;
             width: 100%;
             height: 100%;
-            transform: translate(-50%, -50%) scale(1.35);
             border: 0;
+            display: block;
+            background: #000;
+            pointer-events: none;
+        }
+
+        .player-frame-shell:fullscreen,
+        .player-frame-shell:-webkit-full-screen {
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            aspect-ratio: auto;
+            border-radius: 0;
+        }
+
+        .player-frame-shell:fullscreen iframe,
+        .player-frame-shell:-webkit-full-screen iframe {
+            width: 100%;
+            height: 100%;
+        }
+
+        .player-frame-shell:fullscreen .stream-live-overlay,
+        .player-frame-shell:-webkit-full-screen .stream-live-overlay {
+            left: 12px;
+            right: 12px;
+            bottom: max(12px, env(safe-area-inset-bottom));
         }
 
         .player-click-guard {
@@ -191,6 +239,7 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
             z-index: 2;
             background: transparent;
             cursor: default;
+            touch-action: none;
         }
 
         .stream-live-overlay {
@@ -227,32 +276,6 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
         .player-action-btn:focus {
             outline: 2px solid rgba(255, 255, 255, 0.75);
             outline-offset: 2px;
-        }
-
-        .stream-chrome-mask {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            display: none;
-        }
-
-        .stream-chrome-mask::before,
-        .stream-chrome-mask::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            right: 0;
-            background: #000;
-        }
-
-        .stream-chrome-mask::before {
-            top: 0;
-            height: 74px;
-        }
-
-        .stream-chrome-mask::after {
-            bottom: 0;
-            height: 100px;
         }
 
         .offline-state {
@@ -356,17 +379,97 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
         @media (max-width: 992px) {
             .hero-grid {
                 grid-template-columns: 1fr;
+                gap: 18px;
+            }
+
+            .hero-shell {
+                padding: 20px 18px 36px;
             }
         }
 
         @media (max-width: 576px) {
             .hero-shell {
-                padding: 14px 12px 28px;
+                padding: 16px 16px 32px;
             }
 
             .topbar {
                 flex-direction: column;
-                align-items: flex-start;
+                align-items: stretch;
+                padding: 16px;
+                margin-bottom: 18px;
+                gap: 14px;
+            }
+
+            .brand-block {
+                gap: 12px;
+            }
+
+            .brand-mark,
+            .brand-mark img {
+                width: 48px;
+                height: 48px;
+            }
+
+            .brand-title {
+                font-size: 1.05rem;
+            }
+
+            .brand-subtitle,
+            .brand-sub {
+                font-size: 0.78rem;
+            }
+
+            .topbar-actions {
+                width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .user-pill {
+                width: 100%;
+                border-radius: 18px;
+            }
+
+            .logout-btn {
+                width: 100%;
+                text-align: center;
+                padding: 12px 16px;
+            }
+
+            .panel {
+                border-radius: 20px;
+            }
+
+            .notice-panel {
+                padding: 18px 16px;
+                border-radius: 20px;
+            }
+
+            .stream-live-overlay {
+                left: 12px;
+                right: 12px;
+                bottom: 12px;
+                flex-wrap: wrap;
+            }
+
+            .player-action-btn {
+                padding: 8px 12px;
+                font-size: 0.78rem;
+            }
+
+            .offline-state {
+                min-height: 260px;
+                padding: 24px 18px;
+            }
+
+            .offline-icon {
+                width: 72px;
+                height: 72px;
+                font-size: 1.8rem;
+            }
+
+            .stream-title {
+                font-size: 1.35rem;
             }
         }
     </style>
@@ -384,10 +487,10 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
                 <div class="brand-sub small">Relay Committee &bull; Ashara Mubaraka 1448</div>
             </div>
         </div>
-        <div class="d-flex align-items-center gap-3 flex-wrap">
+        <div class="topbar-actions">
             <div class="user-pill">
                 <div class="avatar"><?= strtoupper(substr($user['name'], 0, 1)) ?></div>
-                <div>
+                <div class="user-meta">
                     <div class="fw-bold"><?= e($user['name']) ?></div>
                     <small class="text-muted">ITS: <?= e($user['its_number'] ?? '-') ?> &bull; Phone: <?= e($user['phone'] ?? '-') ?></small>
                 </div>
@@ -406,7 +509,6 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
                     allowfullscreen
                     title="Live stream player"></iframe>
                 <div class="player-click-guard"></div>
-                <div class="stream-chrome-mask" id="streamChromeMask"></div>
                 <div class="stream-live-overlay">
                     <span id="stream-status-badge" class="<?= $hasStream && ($stream['status'] ?? '') === 'live' ? 'badge-live' : 'badge-offline' ?>">
                         <?= $hasStream && ($stream['status'] ?? '') === 'live' ? '<span class="live-dot"></span> LIVE' : '⚫ OFFLINE' ?>
