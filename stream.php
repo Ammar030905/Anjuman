@@ -72,6 +72,7 @@ $streamUrl = BASE_URL . '/stream.php';
             background: #000;
         }
 
+<<<<<<< HEAD
         /* ── Top bar ── */
         .tv-topbar {
             display: flex;
@@ -156,6 +157,45 @@ $streamUrl = BASE_URL . '/stream.php';
             border: 0;
             display: block;
             background: #000;
+=======
+        .player-frame-shell:fullscreen,
+        .player-frame-shell:-webkit-full-screen {
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            aspect-ratio: auto;
+            border-radius: 0;
+        }
+
+        .player-frame-shell:fullscreen iframe,
+        .player-frame-shell:-webkit-full-screen iframe {
+            width: 100%;
+            height: 100%;
+        }
+
+        .player-frame-shell:fullscreen .stream-top-click-shield,
+        .player-frame-shell:-webkit-full-screen .stream-top-click-shield {
+            inset: 0;
+        }
+
+        .player-frame-shell:fullscreen .stream-live-overlay,
+        .player-frame-shell:-webkit-full-screen .stream-live-overlay {
+            left: 12px;
+            right: 12px;
+            bottom: max(12px, env(safe-area-inset-bottom));
+        }
+
+        .stream-live-overlay {
+            position: absolute;
+            left: 16px;
+            right: 16px;
+            bottom: 16px;
+            z-index: 3;
+            display: none;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 12px;
+>>>>>>> ade887517053e8cccb927811754a0a991a87e212
             pointer-events: none;
         }
 
@@ -558,11 +598,44 @@ $streamUrl = BASE_URL . '/stream.php';
     </style>
     <?php endif; ?>
 </head>
+<<<<<<< HEAD
 <body
     data-stream-status-url="<?= BASE_URL ?>/ajax/stream_status.php"
     data-session-status-url="<?= BASE_URL ?>/ajax/session_status.php"
     data-login-url="<?= BASE_URL ?>/login.php"
     data-prevent-back-navigation="true">
+=======
+<body data-stream-status-url="<?= BASE_URL ?>/ajax/stream_status.php" data-session-status-url="<?= BASE_URL ?>/ajax/session_status.php" data-login-url="<?= BASE_URL ?>/login.php" data-prevent-back-navigation="true">
+<div class="watch-shell">
+    <div class="watch-hero">
+        <section class="player-card slide-up">
+            <div class="player-frame-shell yt-embed-locked" id="streamPlayerShell" style="<?= $hasStream && ($stream['status'] ?? '') === 'live' ? '' : 'display:none;' ?>">
+                <iframe
+                    id="streamPlayerFrame"
+                    src="<?= $hasStream && ($stream['status'] ?? '') === 'live' ? e($stream['embed_url']) : 'about:blank' ?>"
+                    allow="autoplay; encrypted-media"
+                    title="Live stream player"></iframe>
+                <div class="yt-ui-shield yt-ui-shield-top" aria-hidden="true"></div>
+                <div class="yt-ui-shield yt-ui-shield-bottom" aria-hidden="true"></div>
+                <div class="yt-ui-shield yt-ui-shield-logo" aria-hidden="true"></div>
+                <div class="stream-top-click-shield" aria-hidden="true"></div>
+                <div class="stream-live-overlay">
+                    <span id="stream-status-badge" class="<?= $hasStream && ($stream['status'] ?? '') === 'live' ? 'badge-live' : 'badge-offline' ?>">
+                        <?= $hasStream && ($stream['status'] ?? '') === 'live' ? '<span class="live-dot"></span> LIVE' : '⚫ OFFLINE' ?>
+                    </span>
+                    <button type="button" class="player-action-btn" id="streamFullscreenBtn" aria-label="Enter fullscreen">
+                        ⛶ Fullscreen
+                    </button>
+                </div>
+            </div>
+            <div class="offline-state" id="streamOfflineState" style="<?= $hasStream && ($stream['status'] ?? '') === 'live' ? 'display:none;' : '' ?>">
+                <div class="offline-symbol">📡</div>
+                <span class="badge-offline">⚫ OFFLINE</span>
+                <h1 class="watch-title">Live stream is not available right now</h1>
+                <p class="watch-subtitle">Please wait for the next live broadcast.</p>
+            </div>
+        </section>
+>>>>>>> ade887517053e8cccb927811754a0a991a87e212
 
 <?php if ($isTv): ?>
 <!-- ═══════════════════════════════════════════

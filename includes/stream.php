@@ -137,6 +137,7 @@ function extractYouTubeVideoId(string $input): ?string {
 }
 
 function buildYouTubeEmbedUrl(string $videoId): string {
+<<<<<<< HEAD
     // Use youtube-nocookie.com for enhanced privacy
     // Parameters:
     // - autoplay=1: auto-start video
@@ -153,6 +154,23 @@ function buildYouTubeEmbedUrl(string $videoId): string {
         . '?autoplay=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3'
         . '&playsinline=1&fs=0&disablekb=1&enablejsapi=1'
         . '&origin=' . rawurlencode(BASE_URL);
+=======
+    $params = [
+        'autoplay' => '1',
+        'controls' => '0',
+        'rel' => '0',
+        'modestbranding' => '1',
+        'iv_load_policy' => '3',
+        'cc_load_policy' => '0',
+        'playsinline' => '1',
+        'fs' => '0',
+        'disablekb' => '1',
+        'enablejsapi' => '1',
+        'origin' => BASE_URL,
+    ];
+
+    return 'https://www.youtube-nocookie.com/embed/' . rawurlencode($videoId) . '?' . http_build_query($params);
+>>>>>>> ade887517053e8cccb927811754a0a991a87e212
 }
 
 function getCurrentStream(?Database $db = null): ?array {
