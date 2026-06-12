@@ -170,91 +170,22 @@ const StreamViewer = (() => {
         const frame = document.getElementById('streamPlayerFrame');
         const shell = document.getElementById('streamPlayerShell');
         const offline = document.getElementById('streamOfflineState');
-        const overlay = document.querySelector('.stream-live-overlay');
-        const fullscreenBtn = document.getElementById('streamFullscreenBtn');
 
         if (!frame || !shell || !offline) return;
-
-        const setFullscreenState = () => {
-            const requestFullscreen = shell.requestFullscreen
-                || shell.webkitRequestFullscreen
-                || shell.mozRequestFullScreen
-                || shell.msRequestFullscreen;
-
-            if (requestFullscreen) {
-                requestFullscreen.call(shell);
-            }
-        };
-
-        const updateFullscreenLabel = () => {
-            if (!fullscreenBtn) return;
-
-            const active = document.fullscreenElement === shell
-                || document.webkitFullscreenElement === shell
-                || document.mozFullScreenElement === shell
-                || document.msFullscreenElement === shell;
-
-            fullscreenBtn.textContent = active ? '⤫ Exit fullscreen' : '⛶ Fullscreen';
-            fullscreenBtn.setAttribute('aria-label', active ? 'Exit fullscreen' : 'Enter fullscreen');
-        };
-
-        const exitFullscreenState = () => {
-            const exitFullscreen = document.exitFullscreen
-                || document.webkitExitFullscreen
-                || document.mozCancelFullScreen
-                || document.msExitFullscreen;
-
-            if (exitFullscreen) {
-                exitFullscreen.call(document);
-            }
-        };
-
-        if (fullscreenBtn && !fullscreenBtn.dataset.bound) {
-            fullscreenBtn.dataset.bound = 'true';
-            fullscreenBtn.addEventListener('click', (event) => {
-                event.preventDefault();
-                const active = document.fullscreenElement === shell
-                    || document.webkitFullscreenElement === shell
-                    || document.mozFullScreenElement === shell
-                    || document.msFullscreenElement === shell;
-
-                if (active) {
-                    exitFullscreenState();
-                    return;
-                }
-
-                setFullscreenState();
-            });
-
-            ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange']
-                .forEach((eventName) => {
-                    document.addEventListener(eventName, updateFullscreenLabel);
-                });
-        }
 
         if (status === 'live' && embedUrl) {
             if (currentStatus !== 'live' || currentEmbedUrl !== embedUrl) {
                 frame.src = embedUrl;
                 currentEmbedUrl = embedUrl;
-                // Re-bind YT API after src change
-                window.setTimeout(() => {
-                    if (typeof window.initYTPlayer === 'function') window.initYTPlayer();
-                }, 1500);
-            } else {
-                // Already live — just force play if API is ready
-                if (typeof window.initYTPlayer === 'function') window.initYTPlayer();
             }
-
             shell.style.display = 'block';
             offline.style.display = 'none';
             currentStatus = 'live';
-            updateFullscreenLabel();
             return;
         }
 
         shell.style.display = 'none';
         offline.style.display = 'flex';
-        if (fullscreenBtn) fullscreenBtn.textContent = '⛶ Fullscreen';
         currentStatus = 'offline';
     }
 
@@ -266,6 +197,7 @@ const StreamViewer = (() => {
             offlinePollCount = 0;
             setBadge('live');
             setPlayer(embedUrl, 'live');
+            document.dispatchEvent(new CustomEvent('streamStatusChanged', { detail: { live: true, embedUrl } }));
             return;
         }
 
@@ -280,6 +212,7 @@ const StreamViewer = (() => {
         offlinePollCount = 0;
         setBadge('offline');
         setPlayer('', 'offline');
+        document.dispatchEvent(new CustomEvent('streamStatusChanged', { detail: { live: false, embedUrl: '' } }));
     }
 
     function poll() {

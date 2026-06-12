@@ -411,9 +411,9 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
                     <span id="stream-status-badge" class="<?= $hasStream && ($stream['status'] ?? '') === 'live' ? 'badge-live' : 'badge-offline' ?>">
                         <?= $hasStream && ($stream['status'] ?? '') === 'live' ? '<span class="live-dot"></span> LIVE' : '⚫ OFFLINE' ?>
                     </span>
-                    <button type="button" class="player-action-btn" id="streamFullscreenBtn" aria-label="Enter fullscreen">
-                        ⛶ Fullscreen
-                    </button>
+                    <a href="<?= BASE_URL ?>/watch.php" class="player-action-btn" aria-label="Watch fullscreen">
+                        ⛶ Watch Fullscreen
+                    </a>
                 </div>
             </div>
 

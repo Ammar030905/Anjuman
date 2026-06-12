@@ -137,7 +137,22 @@ function extractYouTubeVideoId(string $input): ?string {
 }
 
 function buildYouTubeEmbedUrl(string $videoId): string {
-    return 'https://www.youtube-nocookie.com/embed/' . rawurlencode($videoId) . '?autoplay=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1&fs=0&disablekb=1&enablejsapi=1&origin=' . rawurlencode(BASE_URL);
+    // Use youtube-nocookie.com for enhanced privacy
+    // Parameters:
+    // - autoplay=1: auto-start video
+    // - controls=0: hide YouTube controls completely
+    // - rel=0: prevent related videos
+    // - modestbranding=1: minimize YouTube branding
+    // - iv_load_policy=3: disable video annotations
+    // - playsinline=1: play inline on mobile
+    // - fs=0: disable YouTube's fullscreen button
+    // - disablekb=1: disable keyboard shortcuts that might redirect
+    // - enablejsapi=1: allow JavaScript control
+    // - origin: security requirement for API
+    return 'https://www.youtube-nocookie.com/embed/' . rawurlencode($videoId) 
+        . '?autoplay=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3'
+        . '&playsinline=1&fs=0&disablekb=1&enablejsapi=1'
+        . '&origin=' . rawurlencode(BASE_URL);
 }
 
 function getCurrentStream(?Database $db = null): ?array {
