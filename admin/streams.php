@@ -210,9 +210,18 @@ $currentAttendanceCount = ($currentStream && !empty($currentStream['id'])) ? get
                             <input type="text" class="form-control form-control-dark" id="stream_title" name="stream_title" placeholder="Friday Live Session" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label-dark" for="youtube_url">YouTube Live URL</label>
-                            <input type="url" class="form-control form-control-dark" id="youtube_url" name="youtube_url" placeholder="https://www.youtube.com/watch?v=VIDEO_ID" required>
-                            <small class="text-muted d-block mt-2">Paste the live watch URL or video ID. The app extracts the video ID automatically.</small>
+                            <label class="form-label-dark" for="youtube_url">YouTube Embed Code or Live URL</label>
+                            <textarea class="form-control form-control-dark" id="youtube_url" name="youtube_url" rows="4" placeholder="Paste one of:
+• Full embed code: <iframe src="https://www.youtube.com/embed/VIDEO_ID"...></iframe>
+• Live watch URL: https://www.youtube.com/watch?v=VIDEO_ID
+• Video ID only: VIDEO_ID (11 characters)" required></textarea>
+                            <small class="text-muted d-block mt-2">
+                                <strong>Supported formats:</strong><br>
+                                • Full embed code from YouTube Studio<br>
+                                • Live watch URL (https://youtube.com/watch?v=...)<br>
+                                • Video ID (11 alphanumeric characters)<br>
+                                The system automatically extracts the Video ID.
+                            </small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label-dark" for="stream_status">Stream Status</label>

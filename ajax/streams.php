@@ -117,12 +117,15 @@ if ($action === 'save' || $action === 'start') {
     }
 
     if (!$title || !$youtubeUrl) {
-        jsonResponse(['success' => false, 'message' => 'Title and YouTube URL are required.']);
+        jsonResponse(['success' => false, 'message' => 'Title and YouTube URL/Embed Code are required.']);
     }
 
-    $videoId = extractYouTubeVideoId($youtubeUrl);
+    // Extract all embed attributes
+    $embedAttrs = extractYouTubeEmbedAttributes($youtubeUrl);
+    $videoId = $embedAttrs['video_id'];
+    
     if (!$videoId) {
-        jsonResponse(['success' => false, 'message' => 'Unable to extract a valid YouTube video ID.']);
+        jsonResponse(['success' => false, 'message' => 'Unable to extract a valid YouTube video ID from the provided embed code or URL.']);
     }
 
     if (!in_array($status, ['live', 'offline'], true)) {
@@ -137,19 +140,39 @@ if ($action === 'save' || $action === 'start') {
 
         if ($id > 0) {
             $db->execute(
-                'UPDATE streams SET title = ?, youtube_url = ?, youtube_video_id = ?, status = ? WHERE id = ?',
-                [$title, $youtubeUrl, $videoId, $status, $id]
+                'UPDATE streams SET title = ?, youtube_url = ?, youtube_video_id = ?, embed_width = ?, embed_height = ?, embed_allow = ?, embed_referrerpolicy = ?, status = ? WHERE id = ?',
+                [
+                    $title, 
+                    $youtubeUrl, 
+                    $videoId, 
+                    $embedAttrs['width'], 
+                    $embedAttrs['height'], 
+                    $embedAttrs['allow'], 
+                    $embedAttrs['referrerpolicy'], 
+                    $status, 
+                    $id
+                ]
             );
             $streamId = $id;
         } else {
             $streamId = (int) $db->insert(
-                'INSERT INTO streams (title, youtube_url, youtube_video_id, status, created_by, created_at) VALUES (?, ?, ?, ?, ?, NOW())',
-                [$title, $youtubeUrl, $videoId, $status, (int) $_SESSION['user_id']]
+                'INSERT INTO streams (title, youtube_url, youtube_video_id, embed_width, embed_height, embed_allow, embed_referrerpolicy, status, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())',
+                [
+                    $title, 
+                    $youtubeUrl, 
+                    $videoId, 
+                    $embedAttrs['width'], 
+                    $embedAttrs['height'], 
+                    $embedAttrs['allow'], 
+                    $embedAttrs['referrerpolicy'], 
+                    $status, 
+                    (int) $_SESSION['user_id']
+                ]
             );
         }
 
         $stream = $db->fetchOne(
-            'SELECT s.id, s.title, s.youtube_url, s.youtube_video_id, s.status, s.created_by, s.created_at, u.name AS creator_name
+            'SELECT s.id, s.title, s.youtube_url, s.youtube_video_id, s.embed_width, s.embed_height, s.embed_allow, s.embed_referrerpolicy, s.status, s.created_by, s.created_at, u.name AS creator_name
              FROM streams s
              LEFT JOIN users u ON s.created_by = u.id
              WHERE s.id = ?

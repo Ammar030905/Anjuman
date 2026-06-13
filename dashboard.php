@@ -356,6 +356,71 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
             margin-bottom: 4px;
         }
 
+        /* Device selector bar */
+        .device-selector-bar {
+            padding: 24px;
+            background: rgba(255, 252, 246, 0.65);
+            border-top: 1px solid rgba(183, 138, 58, 0.18);
+        }
+
+        .device-selector-label {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            text-align: center;
+        }
+
+        .device-selector-buttons {
+            display: flex;
+            justify-content: center;
+        }
+
+        .device-select-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 18px;
+            border-radius: 18px;
+            border: 2px solid rgba(183, 138, 58, 0.25);
+            background: rgba(255, 252, 246, 0.85);
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.18s ease;
+            cursor: pointer;
+        }
+
+        .device-select-btn:hover {
+            border-color: var(--accent);
+            background: rgba(255, 252, 246, 0.98);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(11, 109, 88, 0.15);
+        }
+
+        .device-select-btn .device-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.1));
+        }
+
+        .device-select-btn .device-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .device-select-btn .device-text strong {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .device-select-btn .device-text small {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
         @media (max-width: 992px) {
             .hero-grid {
                 grid-template-columns: 1fr;
@@ -451,6 +516,31 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
             .stream-title {
                 font-size: 1.35rem;
             }
+
+            .device-selector-bar {
+                padding: 18px 16px;
+            }
+
+            .device-selector-buttons {
+                justify-content: stretch;
+            }
+
+            .device-select-btn {
+                padding: 14px 16px;
+                flex: 1;
+            }
+
+            .device-select-btn .device-icon {
+                font-size: 1.6rem;
+            }
+
+            .device-select-btn .device-text strong {
+                font-size: 0.88rem;
+            }
+
+            .device-select-btn .device-text small {
+                font-size: 0.7rem;
+            }
         }
     </style>
 </head>
@@ -495,8 +585,8 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
                     <span id="stream-status-badge" class="<?= $hasStream && ($stream['status'] ?? '') === 'live' ? 'badge-live' : 'badge-offline' ?>">
                         <?= $hasStream && ($stream['status'] ?? '') === 'live' ? '<span class="live-dot"></span> LIVE' : '⚫ OFFLINE' ?>
                     </span>
-                    <a href="<?= BASE_URL ?>/watch.php" class="player-action-btn" aria-label="Watch fullscreen">
-                        ⛶ Watch Fullscreen
+                    <a href="<?= BASE_URL ?>/stream.php" class="player-action-btn" aria-label="Watch fullscreen">
+                        ⛶ Watch Stream
                     </a>
                 </div>
             </div>
@@ -507,6 +597,20 @@ if ($hasStream && ($stream['status'] ?? '') === 'live') {
                 <div class="badge-offline mb-3">⚫ OFFLINE</div>
                 <h2 class="stream-title">Live stream is not available right now</h2>
                 <p class="stream-copy">Please wait for the next live broadcast.</p>
+            </div>
+
+            <!-- Device selector buttons -->
+            <div class="device-selector-bar">
+                <div class="device-selector-label">Watch the live stream:</div>
+                <div class="device-selector-buttons">
+                    <a href="<?= BASE_URL ?>/stream.php" class="device-select-btn">
+                        <span class="device-icon">⛶</span>
+                        <span class="device-text">
+                            <strong>Open Stream</strong>
+                            <small>Responsive player</small>
+                        </span>
+                    </a>
+                </div>
             </div>
         </section>
 

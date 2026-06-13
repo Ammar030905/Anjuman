@@ -13,7 +13,7 @@ function hasStreamsSchema(Database $db): bool {
     }
 
     try {
-        $columns = ['title', 'status', 'created_at', 'youtube_url', 'youtube_video_id', 'created_by'];
+        $columns = ['title', 'status', 'created_at', 'youtube_url', 'youtube_video_id', 'created_by', 'embed_width', 'embed_height', 'embed_allow', 'embed_referrerpolicy'];
         foreach ($columns as $column) {
             if (!$db->columnExists('streams', $column)) {
                 $cached = false;
@@ -45,6 +45,10 @@ function ensureStreamsSchema(?Database $db = null): bool {
         $hasYoutubeVideoId = $db->columnExists('streams', 'youtube_video_id');
         $hasCreatedBy = $db->columnExists('streams', 'created_by');
         $hasCreatedAt = $db->columnExists('streams', 'created_at');
+        $hasEmbedWidth = $db->columnExists('streams', 'embed_width');
+        $hasEmbedHeight = $db->columnExists('streams', 'embed_height');
+        $hasEmbedAllow = $db->columnExists('streams', 'embed_allow');
+        $hasEmbedReferrerpolicy = $db->columnExists('streams', 'embed_referrerpolicy');
 
         if (!$hasYoutubeUrl) {
             $db->execute("ALTER TABLE streams ADD COLUMN youtube_url VARCHAR(500) NULL AFTER title");
@@ -52,6 +56,22 @@ function ensureStreamsSchema(?Database $db = null): bool {
 
         if (!$hasYoutubeVideoId) {
             $db->execute("ALTER TABLE streams ADD COLUMN youtube_video_id VARCHAR(20) NULL AFTER youtube_url");
+        }
+
+        if (!$hasEmbedWidth) {
+            $db->execute("ALTER TABLE streams ADD COLUMN embed_width VARCHAR(10) NULL AFTER youtube_video_id");
+        }
+
+        if (!$hasEmbedHeight) {
+            $db->execute("ALTER TABLE streams ADD COLUMN embed_height VARCHAR(10) NULL AFTER embed_width");
+        }
+
+        if (!$hasEmbedAllow) {
+            $db->execute("ALTER TABLE streams ADD COLUMN embed_allow TEXT NULL AFTER embed_height");
+        }
+
+        if (!$hasEmbedReferrerpolicy) {
+            $db->execute("ALTER TABLE streams ADD COLUMN embed_referrerpolicy VARCHAR(100) NULL AFTER embed_allow");
         }
 
         if (!$hasCreatedBy) {
@@ -89,21 +109,76 @@ function ensureStreamsSchema(?Database $db = null): bool {
     }
 }
 
+function extractYouTubeEmbedAttributes(string $input): array {
+    $value = trim($input);
+    $result = [
+        'video_id' => null,
+        'width' => null,
+        'height' => null,
+        'allow' => null,
+        'referrerpolicy' => null,
+    ];
+
+    if ($value === '') {
+        return $result;
+    }
+
+    // Extract Video ID from embed code: <iframe src="https://www.youtube.com/embed/VIDEO_ID"...>
+    if (preg_match('/embed\/([A-Za-z0-9_-]{11})/', $value, $matches)) {
+        $result['video_id'] = $matches[1];
+    }
+
+    // Extract width attribute
+    if (preg_match('/width="(\d+)"/', $value, $matches)) {
+        $result['width'] = $matches[1];
+    }
+
+    // Extract height attribute
+    if (preg_match('/height="(\d+)"/', $value, $matches)) {
+        $result['height'] = $matches[1];
+    }
+
+    // Extract allow attribute
+    if (preg_match('/allow="([^"]+)"/', $value, $matches)) {
+        $result['allow'] = $matches[1];
+    }
+
+    // Extract referrerpolicy attribute
+    if (preg_match('/referrerpolicy="([^"]+)"/', $value, $matches)) {
+        $result['referrerpolicy'] = $matches[1];
+    }
+
+    // If no video ID found yet, try other extraction methods
+    if (!$result['video_id']) {
+        $result['video_id'] = extractYouTubeVideoId($value);
+    }
+
+    return $result;
+}
+
 function extractYouTubeVideoId(string $input): ?string {
     $value = trim($input);
     if ($value === '') {
         return null;
     }
 
+    // Already a Video ID (11 chars, alphanumeric + - _)
     if (preg_match('/^[A-Za-z0-9_-]{11}$/', $value)) {
         return $value;
     }
 
+    // Extract from embed code: <iframe src="https://www.youtube.com/embed/VIDEO_ID"...>
+    if (preg_match('/embed\/([A-Za-z0-9_-]{11})/', $value, $matches)) {
+        return $matches[1];
+    }
+
+    // Extract from URL with parse_url
     $parts = parse_url($value);
     if ($parts === false) {
         return null;
     }
 
+    // Watch URL: ?v=VIDEO_ID
     if (!empty($parts['query'])) {
         parse_str($parts['query'], $query);
         foreach (['v', 'vi', 'video_id'] as $key) {
@@ -113,6 +188,7 @@ function extractYouTubeVideoId(string $input): ?string {
         }
     }
 
+    // Path-based extraction: /embed/VIDEO_ID, /live/VIDEO_ID, /shorts/VIDEO_ID
     if (!empty($parts['path'])) {
         $segments = array_values(array_filter(explode('/', trim($parts['path'], '/'))));
         $lastSegment = $segments ? end($segments) : '';
@@ -129,6 +205,7 @@ function extractYouTubeVideoId(string $input): ?string {
         }
     }
 
+    // Fallback generic pattern
     if (preg_match('/(?:v=|\/)([A-Za-z0-9_-]{11})(?:[?&\/]|$)/', $value, $matches)) {
         return $matches[1];
     }
@@ -137,24 +214,6 @@ function extractYouTubeVideoId(string $input): ?string {
 }
 
 function buildYouTubeEmbedUrl(string $videoId): string {
-<<<<<<< HEAD
-    // Use youtube-nocookie.com for enhanced privacy
-    // Parameters:
-    // - autoplay=1: auto-start video
-    // - controls=0: hide YouTube controls completely
-    // - rel=0: prevent related videos
-    // - modestbranding=1: minimize YouTube branding
-    // - iv_load_policy=3: disable video annotations
-    // - playsinline=1: play inline on mobile
-    // - fs=0: disable YouTube's fullscreen button
-    // - disablekb=1: disable keyboard shortcuts that might redirect
-    // - enablejsapi=1: allow JavaScript control
-    // - origin: security requirement for API
-    return 'https://www.youtube-nocookie.com/embed/' . rawurlencode($videoId) 
-        . '?autoplay=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3'
-        . '&playsinline=1&fs=0&disablekb=1&enablejsapi=1'
-        . '&origin=' . rawurlencode(BASE_URL);
-=======
     $params = [
         'autoplay' => '1',
         'controls' => '0',
@@ -170,7 +229,6 @@ function buildYouTubeEmbedUrl(string $videoId): string {
     ];
 
     return 'https://www.youtube-nocookie.com/embed/' . rawurlencode($videoId) . '?' . http_build_query($params);
->>>>>>> ade887517053e8cccb927811754a0a991a87e212
 }
 
 function getCurrentStream(?Database $db = null): ?array {
