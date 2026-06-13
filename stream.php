@@ -96,7 +96,7 @@ if ($isLive) {
             height: 100%;
             border: none;
             display: block;
-            pointer-events: auto;
+            pointer-events: none;
             /* Ignore admin-provided width/height - always use container size */
         }
 
@@ -134,16 +134,17 @@ if ($isLive) {
         .video-overlay {
             position: absolute;
             inset: 0;
-            z-index: 2;
+            z-index: 10;
             background: transparent;
             cursor: pointer;
+            pointer-events: auto;
         }
 
         .video-controls {
             position: absolute;
             bottom: 16px;
             right: 16px;
-            z-index: 3;
+            z-index: 11;
             display: flex;
             gap: 10px;
             pointer-events: auto;
@@ -169,7 +170,7 @@ if ($isLive) {
             position: absolute;
             top: 16px;
             left: 16px;
-            z-index: 3;
+            z-index: 11;
             pointer-events: none;
         }
 
