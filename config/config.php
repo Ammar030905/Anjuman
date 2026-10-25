@@ -11,19 +11,19 @@ define('APP_NAME', 'Anjuman E Ezzy');
 define('APP_VERSION', '1.0.0');
 define('APP_ENV', getenv('APP_ENV') ?: 'development'); // 'development' | 'production'
 
-$baseUrl = getenv('BASE_URL') ?: getenv('APP_URL') ?: 'http://localhost/Anjuman';
+$baseUrl = getenv('BASE_URL') ?: getenv('APP_URL') ?: 'https://live-streaming.ct.ws';
 define('BASE_URL', rtrim($baseUrl, '/'));
 
 // ─── Database ─────────────────────────────────────────────────────────────────
 define('DB_DRIVER', getenv('DB_DRIVER') ?: 'mysql');
-define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_PORT', getenv('DB_PORT') ?: '');
-define('DB_NAME', getenv('DB_NAME') ?: 'anjuman_ezzy');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASS', getenv('DB_PASS') ?: '');
+define('DB_HOST', getenv('DB_HOST') ?: 'sql307.infinityfree.com');
+define('DB_PORT', getenv('DB_PORT') ?: '3306');
+define('DB_NAME', getenv('DB_NAME') ?: 'if0_43245501_anjumanlivestream');
+define('DB_USER', getenv('DB_USER') ?: 'if0_43245501');
+define('DB_PASS', getenv('DB_PASS') ?: 'eiaXcfDgfz9');
 define('DB_CHARSET', getenv('DB_CHARSET') ?: 'utf8mb4');
 define('DB_SCHEMA', getenv('DB_SCHEMA') ?: (in_array(strtolower(DB_DRIVER), ['pgsql', 'postgres', 'postgresql'], true) ? 'public' : DB_NAME));
-define('DB_SSLMODE', getenv('DB_SSLMODE') ?: 'require');
+define('DB_SSLMODE', getenv('DB_SSLMODE') ?: '');
 define('DATABASE_URL', getenv('DATABASE_URL') ?: getenv('DB_URL') ?: '');
 
 // ─── Streaming ────────────────────────────────────────────────────────────────

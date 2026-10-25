@@ -104,6 +104,8 @@ CREATE TABLE IF NOT EXISTS `activity_logs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `users` (`its_number`, `name`, `phone`, `password`, `role`, `status`) VALUES
-('12345678', 'Super Admin', '9876543210', '', 'admin', 1);
+('12345678', 'Super Admin', '9876543210', 'admin123', 'admin', 1);
 
+INSERT INTO `users` (`its_number`, `name`, `phone`, `password`, `role`, `status`) VALUES
+('12345678', 'test', '9876543210', 'test123', 'user', 1);
 COMMIT;

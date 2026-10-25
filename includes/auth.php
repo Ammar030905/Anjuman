@@ -122,6 +122,11 @@ class Auth {
                 $secure = strtolower((string) $_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https';
             }
 
+            $sessionPath = sys_get_temp_dir();
+            if (is_writable($sessionPath)) {
+                session_save_path($sessionPath);
+            }
+
             ini_set('session.use_strict_mode', '1');
             ini_set('session.cookie_httponly', '1');
             ini_set('session.cookie_secure', $secure ? '1' : '0');

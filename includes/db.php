@@ -80,7 +80,8 @@ class Database {
             }
             $dsn .= ';dbname=' . $this->name . ';options=--client_encoding=UTF8;sslmode=' . $this->sslmode . ';connect_timeout=5;application_name=AnjumanEEzzy';
         } else {
-            $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->name . ';charset=' . DB_CHARSET;
+            $port = $this->port !== '' ? $this->port : '3306';
+            $dsn = 'mysql:host=' . $this->host . ';port=' . $port . ';dbname=' . $this->name . ';charset=' . DB_CHARSET;
         }
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
